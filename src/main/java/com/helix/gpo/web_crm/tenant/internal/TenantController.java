@@ -4,6 +4,7 @@ import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos.CreateTenantRequest;
 import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos.TenantResponse;
 import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos.UpdateContactDetailsRequest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,13 +15,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/crm/tenants")
+@RequiredArgsConstructor
 class TenantController {
 
     private final TenantService tenantService;
-
-    TenantController(TenantService tenantService) {
-        this.tenantService = tenantService;
-    }
 
     @PostMapping
     ResponseEntity<TenantResponse> create(@Valid @RequestBody CreateTenantRequest request) {

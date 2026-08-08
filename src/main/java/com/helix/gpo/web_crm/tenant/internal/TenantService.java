@@ -4,6 +4,7 @@ import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos.CreateTenantRequest;
 import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos.TenantResponse;
 import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos.UpdateContactDetailsRequest;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,14 +12,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 @Transactional
 class TenantService {
 
     private final TenantRepository tenantRepository;
-
-    TenantService(TenantRepository tenantRepository) {
-        this.tenantRepository = tenantRepository;
-    }
 
     TenantResponse create(CreateTenantRequest request) {
         Tenant tenant = Tenant.builder()
