@@ -1,0 +1,12 @@
+package com.helix.gpo.web_crm.project.internal;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.UUID;
+
+interface MilestoneRepository extends JpaRepository<Milestone, UUID> {
+
+    List<Milestone> findAllByProjectId(UUID projectId);
+
+}
