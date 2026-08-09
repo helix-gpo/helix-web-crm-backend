@@ -1,4 +1,4 @@
-package com.helix.gpo.web_crm.project.api;
+package com.helix.gpo.web_crm.project;
 
 import java.util.List;
 import java.util.Optional;

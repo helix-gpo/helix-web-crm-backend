@@ -1,4 +1,4 @@
-package com.helix.gpo.web_crm.project.api;
+package com.helix.gpo.web_crm.project;
 
 import com.helix.gpo.web_crm.shared.Money;
 

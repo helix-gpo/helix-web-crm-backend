@@ -1,6 +1,8 @@
 package com.helix.gpo.web_crm.tenant.internal;
 
-import com.helix.gpo.web_crm.tenant.api.TenantSummary;
+import com.helix.gpo.web_crm.tenant.PartnerSummary;
+import com.helix.gpo.web_crm.tenant.TenantBillingDetails;
+import com.helix.gpo.web_crm.tenant.TenantSummary;
 import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos;
 
 final class TenantMapper {
@@ -29,6 +31,28 @@ final class TenantMapper {
                 tenant.getId(),
                 tenant.getCompanyName(),
                 tenant.getStatus().name()
+        );
+    }
+
+    static TenantBillingDetails toBillingDetails(Tenant tenant) {
+        return new TenantBillingDetails(
+                tenant.getId(),
+                tenant.getCompanyName(),
+                tenant.getLegalName(),
+                tenant.getVatId(),
+                tenant.getAddress(),
+                tenant.getContactEmail()
+        );
+    }
+
+    static PartnerSummary toPartnerSummary(Partner partner) {
+        return new PartnerSummary(
+                partner.getId(),
+                partner.tenantId(),
+                partner.getTenant().getCompanyName(),
+                partner.getFirstName(),
+                partner.getLastName(),
+                partner.getRole()
         );
     }
 

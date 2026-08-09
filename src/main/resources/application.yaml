@@ -30,3 +30,18 @@ server:
 logging:
   level:
     org.springframework.modulith: DEBUG
+
+helix:
+  company:
+    name: Helix GPO
+    legal-name: Helix GPO UG (haftungsbeschränkt) & Co. KG
+    vat-id: ${HELIX_VAT_ID}
+    address:
+      street: Erftstraße
+      house-number: "50"
+      postal-code: "41460"
+      city: Neuss
+      country-code: DE
+    email: helix.gpo@gmail.com
+    iban: ${HELIX_IBAN}
+    bic: ${HELIX_BIC}

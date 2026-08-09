@@ -1,8 +1,8 @@
 package com.helix.gpo.web_crm.project.internal;
 
-import com.helix.gpo.web_crm.project.api.MilestoneSummary;
-import com.helix.gpo.web_crm.project.api.ProjectApi;
-import com.helix.gpo.web_crm.project.api.ProjectSummary;
+import com.helix.gpo.web_crm.project.MilestoneSummary;
+import com.helix.gpo.web_crm.project.ProjectApi;
+import com.helix.gpo.web_crm.project.ProjectSummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

@@ -1,4 +1,4 @@
-package com.helix.gpo.web_crm.tenant.api;
+package com.helix.gpo.web_crm.tenant;
 
 import java.util.UUID;
 

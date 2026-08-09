@@ -1,7 +1,7 @@
 package com.helix.gpo.web_crm.project.internal;
 
-import com.helix.gpo.web_crm.project.api.MilestoneSummary;
-import com.helix.gpo.web_crm.project.api.ProjectSummary;
+import com.helix.gpo.web_crm.project.MilestoneSummary;
+import com.helix.gpo.web_crm.project.ProjectSummary;
 import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos.MilestoneResponse;
 import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos.ProjectResponse;
 import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos.ProjectTagDto;

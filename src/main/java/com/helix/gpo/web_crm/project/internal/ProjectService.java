@@ -1,7 +1,7 @@
 package com.helix.gpo.web_crm.project.internal;
 
 import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos.*;
-import com.helix.gpo.web_crm.tenant.api.TenantApi;
+import com.helix.gpo.web_crm.tenant.TenantApi;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
