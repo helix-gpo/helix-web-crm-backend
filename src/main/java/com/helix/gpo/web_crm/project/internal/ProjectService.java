@@ -45,6 +45,13 @@ class ProjectService {
     }
 
     @Transactional(readOnly = true)
+    List<ProjectResponse> findAll() {
+        return projectRepository.findAll().stream()
+                .map(ProjectMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     List<ProjectResponse> findAllByTenant(UUID tenantId) {
         return projectRepository.findAllByTenantId(tenantId).stream()
                 .map(ProjectMapper::toResponse)

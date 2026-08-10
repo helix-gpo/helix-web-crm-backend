@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/crm/projects")
 @RequiredArgsConstructor
+@RequestMapping("/api/crm/projects")
 class ProjectController {
 
     private final ProjectService projectService;
@@ -28,9 +28,10 @@ class ProjectController {
         return projectService.findById(id);
     }
 
+    // Ersetzt die alte findAllByTenant(@RequestParam UUID tenantId)
     @GetMapping
-    List<ProjectResponse> findAllByTenant(@RequestParam UUID tenantId) {
-        return projectService.findAllByTenant(tenantId);
+    List<ProjectResponse> findAll(@RequestParam(required = false) UUID tenantId) {
+        return tenantId != null ? projectService.findAllByTenant(tenantId) : projectService.findAll();
     }
 
     @PatchMapping("/{id}/status")

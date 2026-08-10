@@ -1,5 +1,6 @@
 package com.helix.gpo.web_crm.tenant.internal;
 
+import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos;
 import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos.CreateTenantRequest;
 import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos.TenantResponse;
 import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos.UpdateContactDetailsRequest;
@@ -17,6 +18,7 @@ import java.util.UUID;
 class TenantService {
 
     private final TenantRepository tenantRepository;
+    private final PartnerRepository partnerRepository;
 
     TenantResponse create(CreateTenantRequest request) {
         Tenant tenant = Tenant.builder()
@@ -40,6 +42,13 @@ class TenantService {
     List<TenantResponse> findAll() {
         return tenantRepository.findAll().stream()
                 .map(TenantMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    List<TenantDtos.PartnerResponse> findPartnersByTenant(UUID tenantId) {
+        return partnerRepository.findAllByTenantId(tenantId).stream()
+                .map(TenantMapper::toPartnerResponse)
                 .toList();
     }
 

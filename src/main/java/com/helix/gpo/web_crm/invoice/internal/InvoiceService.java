@@ -74,6 +74,13 @@ class InvoiceService {
     }
 
     @Transactional(readOnly = true)
+    List<InvoiceResponse> findAll() {
+        return invoiceRepository.findAll().stream()
+                .map(InvoiceMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     List<InvoiceResponse> findAllByTenant(UUID tenantId) {
         return invoiceRepository.findAllByTenantId(tenantId).stream()
                 .map(InvoiceMapper::toResponse)

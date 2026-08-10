@@ -45,4 +45,14 @@ public final class TenantDtos {
     ) {
     }
 
+    public record PartnerResponse(
+            UUID id,
+            String firstName,
+            String lastName,
+            String role,
+            String email,
+            String phone
+    ) {
+    }
+
 }

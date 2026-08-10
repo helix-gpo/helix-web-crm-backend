@@ -2,6 +2,7 @@ package com.helix.gpo.web_crm.invoice.internal;
 
 import com.helix.gpo.web_crm.invoice.internal.dto.InvoiceDtos.*;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,14 +11,11 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/crm/invoices")
 class InvoiceController {
 
     private final InvoiceService invoiceService;
-
-    InvoiceController(InvoiceService invoiceService) {
-        this.invoiceService = invoiceService;
-    }
 
     @GetMapping("/prefill")
     InvoicePrefillResponse prefill(@RequestParam UUID tenantId,
@@ -36,9 +34,11 @@ class InvoiceController {
         return invoiceService.findById(id);
     }
 
+    // Ersetzt die alte findAllByTenant(@RequestParam UUID tenantId) - genau
+    // die Doppelbelegung war die Ursache des Ambiguous-Mapping-Fehlers
     @GetMapping
-    List<InvoiceResponse> findAllByTenant(@RequestParam UUID tenantId) {
-        return invoiceService.findAllByTenant(tenantId);
+    List<InvoiceResponse> findAll(@RequestParam(required = false) UUID tenantId) {
+        return tenantId != null ? invoiceService.findAllByTenant(tenantId) : invoiceService.findAll();
     }
 
     @PostMapping("/{id}/line-items")

@@ -96,6 +96,13 @@ class TestimonialService {
     }
 
     @Transactional(readOnly = true)
+    List<TestimonialResponse> findAll() {
+        return testimonialRepository.findAll().stream()
+                .map(TestimonialMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     List<TestimonialResponse> findAllByTenant(UUID tenantId) {
         return testimonialRepository.findAllByTenantId(tenantId).stream()
                 .map(TestimonialMapper::toResponse)

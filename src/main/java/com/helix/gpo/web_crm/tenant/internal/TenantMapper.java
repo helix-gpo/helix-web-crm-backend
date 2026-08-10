@@ -56,4 +56,15 @@ final class TenantMapper {
         );
     }
 
+    static TenantDtos.PartnerResponse toPartnerResponse(Partner partner) {
+        return new TenantDtos.PartnerResponse(
+                partner.getId(),
+                partner.getFirstName(),
+                partner.getLastName(),
+                partner.getRole(),
+                partner.getEmail(),
+                partner.getPhone()
+        );
+    }
+
 }

@@ -7,3 +7,4 @@
 - cron jobs + validation
 - website view for testimonials + projects view
 - loading spinners
+- clean code (annotations - no constructors etc.)
