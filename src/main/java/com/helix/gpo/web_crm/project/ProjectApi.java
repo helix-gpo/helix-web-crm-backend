@@ -14,4 +14,6 @@ public interface ProjectApi {
 
     List<MilestoneSummary> findMilestoneSummariesByProject(UUID projectId);
 
+    List<PublicProjectSummary> findAllVisibleOnWebsite();
+
 }

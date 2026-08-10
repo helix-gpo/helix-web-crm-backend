@@ -2,6 +2,7 @@ package com.helix.gpo.web_crm.project.internal;
 
 import com.helix.gpo.web_crm.project.MilestoneSummary;
 import com.helix.gpo.web_crm.project.ProjectSummary;
+import com.helix.gpo.web_crm.project.PublicProjectSummary;
 import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos.MilestoneResponse;
 import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos.ProjectResponse;
 import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos.ProjectTagDto;
@@ -62,6 +63,21 @@ final class ProjectMapper {
                 milestone.getDueDate(),
                 milestone.getStatus().name(),
                 milestone.getPrice()
+        );
+    }
+
+    static PublicProjectSummary toPublicSummary(Project project) {
+        return new PublicProjectSummary(
+                project.getId(),
+                project.getTitle(),
+                project.getDescription(),
+                project.getFullDescription(),
+                project.getHighlights(),
+                project.getTags().stream()
+                        .map(tag -> new com.helix.gpo.web_crm.project.PublicProjectSummary.ProjectTagView(
+                                tag.value(), tag.colorHex()))
+                        .toList(),
+                project.getStartDate()
         );
     }
 

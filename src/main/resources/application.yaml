@@ -45,3 +45,5 @@ helix:
     email: helix.gpo@gmail.com
     iban: ${HELIX_IBAN}
     bic: ${HELIX_BIC}
+  security:
+    public-ip-allowlist: ${PUBLIC_IP_ALLOWLIST}

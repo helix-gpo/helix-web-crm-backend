@@ -1,5 +1,6 @@
 package com.helix.gpo.web_crm.testimonial.internal;
 
+import com.helix.gpo.web_crm.testimonial.TestimonialSummary;
 import com.helix.gpo.web_crm.testimonial.internal.dto.TestimonialDtos.TestimonialResponse;
 
 final class TestimonialMapper {
@@ -20,6 +21,18 @@ final class TestimonialMapper {
                 testimonial.getRating(),
                 testimonial.getStatus(),
                 testimonial.isVisibleOnWebsite(),
+                testimonial.getCreatedAt()
+        );
+    }
+
+    static TestimonialSummary toSummary(Testimonial testimonial) {
+        return new TestimonialSummary(
+                testimonial.getId(),
+                testimonial.getPartnerNameSnapshot(),
+                testimonial.getPartnerRoleSnapshot(),
+                testimonial.getCompanyNameSnapshot(),
+                testimonial.getDescription(),
+                testimonial.getRating(),
                 testimonial.getCreatedAt()
         );
     }

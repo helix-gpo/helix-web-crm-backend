@@ -3,6 +3,7 @@ package com.helix.gpo.web_crm.project.internal;
 import com.helix.gpo.web_crm.project.MilestoneSummary;
 import com.helix.gpo.web_crm.project.ProjectApi;
 import com.helix.gpo.web_crm.project.ProjectSummary;
+import com.helix.gpo.web_crm.project.PublicProjectSummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +39,13 @@ class ProjectApiImpl implements ProjectApi {
     public List<MilestoneSummary> findMilestoneSummariesByProject(UUID projectId) {
         return milestoneRepository.findAllByProjectId(projectId).stream()
                 .map(ProjectMapper::toMilestoneSummary)
+                .toList();
+    }
+
+    @Override
+    public List<PublicProjectSummary> findAllVisibleOnWebsite() {
+        return projectRepository.findAllByVisibleOnWebsiteTrue().stream()
+                .map(ProjectMapper::toPublicSummary)
                 .toList();
     }
 
