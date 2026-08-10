@@ -8,3 +8,13 @@
 - website view for testimonials + projects view
 - loading spinners
 - clean code (annotations - no constructors etc.)
+
+# tuesday:
+- correct font on tenant details
+- tenant menu fix
+- error fixes:
+  - tenant-details
+  - invoices
+  - projects
+- login/logout
+- main page (welcome)
