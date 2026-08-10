@@ -2,7 +2,12 @@ spring:
   application:
     name: helix-crm
   profiles:
-    active: dev
+    active: ${ACTIVE_SPRING_PROFILE:dev}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${COGNITO_ISSUER_URI}
 
   datasource:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&serverTimezone=UTC
@@ -47,3 +52,5 @@ helix:
     bic: ${HELIX_BIC}
   security:
     public-ip-allowlist: ${PUBLIC_IP_ALLOWLIST}
+    cognito:
+      client-id: ${COGNITO_CLIENT_ID}

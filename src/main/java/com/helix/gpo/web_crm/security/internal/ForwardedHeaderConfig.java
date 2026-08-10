@@ -1,4 +1,4 @@
-package com.helix.gpo.web_crm.website.internal.config;
+package com.helix.gpo.web_crm.security.internal;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
