@@ -23,6 +23,7 @@ class InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
     private final InvoiceLineItemRepository invoiceLineItemRepository;
+    private final InvoiceNumberGenerator invoiceNumberGenerator;
     private final TenantApi tenantApi;
     private final ProjectApi projectApi;
     private final CompanyBillingProperties companyBillingProperties;
@@ -60,8 +61,10 @@ class InvoiceService {
     InvoiceResponse issue(UUID invoiceId, IssueInvoiceRequest request) {
         Invoice invoice = getInvoiceOrThrow(invoiceId);
         LocalDate issueDate = request != null && request.issueDate() != null ? request.issueDate() : LocalDate.now();
-        String invoiceNumber = generateInvoiceNumber();
+
+        String invoiceNumber = invoiceNumberGenerator.generateNext();
         invoice.issue(invoiceNumber, issueDate);
+
         return InvoiceMapper.toResponse(invoice);
     }
 
