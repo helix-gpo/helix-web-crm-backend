@@ -1,8 +1,6 @@
 package com.helix.gpo.web_crm.tenant.internal;
 
-import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos.CreateTenantRequest;
-import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos.TenantResponse;
-import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos.UpdateContactDetailsRequest;
+import com.helix.gpo.web_crm.tenant.internal.dto.TenantDtos.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,8 +12,8 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/crm/tenants")
 @RequiredArgsConstructor
+@RequestMapping("/api/crm/tenants")
 class TenantController {
 
     private final TenantService tenantService;
@@ -36,6 +34,11 @@ class TenantController {
         return tenantService.findAll();
     }
 
+    @GetMapping("/{id}/partners")
+    List<PartnerResponse> findPartners(@PathVariable UUID id) {
+        return tenantService.findPartnersByTenant(id);
+    }
+
     @PatchMapping("/{id}/contact-details")
     TenantResponse updateContactDetails(@PathVariable UUID id,
                                         @Valid @RequestBody UpdateContactDetailsRequest request) {
@@ -51,6 +54,31 @@ class TenantController {
     @ResponseStatus(HttpStatus.OK)
     TenantResponse archive(@PathVariable UUID id) {
         return tenantService.archive(id);
+    }
+
+    @PostMapping("/{id}/partners")
+    ResponseEntity<PartnerResponse> addPartner(@PathVariable UUID id,
+                                               @Valid @RequestBody CreatePartnerRequest request) {
+        PartnerResponse response = tenantService.addPartner(id, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PatchMapping("/{tenantId}/partners/{partnerId}")
+    PartnerResponse updatePartner(@PathVariable UUID tenantId, @PathVariable UUID partnerId,
+                                  @Valid @RequestBody UpdatePartnerRequest request) {
+        return tenantService.updatePartner(partnerId, request);
+    }
+
+    @DeleteMapping("/{tenantId}/partners/{partnerId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void removePartner(@PathVariable UUID tenantId, @PathVariable UUID partnerId) {
+        tenantService.removePartner(partnerId);
+    }
+
+    @PatchMapping("/{id}/core-details")
+    TenantResponse updateCoreDetails(@PathVariable UUID id,
+                                     @Valid @RequestBody UpdateCoreDetailsRequest request) {
+        return tenantService.updateCoreDetails(id, request);
     }
 
 }

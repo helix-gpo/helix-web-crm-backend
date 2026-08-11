@@ -56,4 +56,10 @@ class Tenant extends BaseEntity {
         this.address = address;
     }
 
+    public void updateCoreDetails(String companyName, String legalName, String vatId) {
+        this.companyName = companyName;
+        this.legalName = legalName;
+        this.vatId = vatId;
+    }
+
 }

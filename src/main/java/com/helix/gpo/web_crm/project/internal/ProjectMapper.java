@@ -7,6 +7,8 @@ import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos.MilestoneResponse;
 import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos.ProjectResponse;
 import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos.ProjectTagDto;
 
+import java.util.List;
+
 final class ProjectMapper {
 
     private ProjectMapper() {
@@ -19,7 +21,7 @@ final class ProjectMapper {
                 project.getTitle(),
                 project.getDescription(),
                 project.getFullDescription(),
-                project.getHighlights(),
+                List.copyOf(project.getHighlights()),
                 project.getTags().stream()
                         .map(tag -> new ProjectTagDto(tag.value(), tag.colorHex()))
                         .toList(),

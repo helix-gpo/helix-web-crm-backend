@@ -37,6 +37,7 @@ class PublicSecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().denyAll()
                 );
         return http.build();

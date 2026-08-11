@@ -39,4 +39,12 @@ class Partner extends BaseEntity {
         return tenant.getId();
     }
 
+    public void updateDetails(String firstName, String lastName, String role, String email, String phone) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.role = role;
+        this.email = email;
+        this.phone = phone;
+    }
+
 }

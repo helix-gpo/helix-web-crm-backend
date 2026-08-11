@@ -7,14 +7,11 @@
 - cron jobs + validation
 - website view for testimonials + projects view
 - loading spinners
-- clean code (annotations - no constructors etc.)
+- clean code (annotations - no constructors etc. + sort methods)
+- dialogs (hover/active colors - colors in general)
 
 # tuesday:
-- correct font on tenant details
-- tenant menu fix
-- error fixes:
-  - tenant-details
-  - invoices
-  - projects
+- projects cleaner
 - login/logout
 - main page (welcome)
+- website visibility (testimonials + projects)

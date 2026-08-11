@@ -55,4 +55,29 @@ public final class TenantDtos {
     ) {
     }
 
+    public record CreatePartnerRequest(
+            @NotBlank String firstName,
+            @NotBlank String lastName,
+            String role,
+            @Email String email,
+            String phone
+    ) {
+    }
+
+    public record UpdatePartnerRequest(
+            @NotBlank String firstName,
+            @NotBlank String lastName,
+            String role,
+            @Email String email,
+            String phone
+    ) {
+    }
+
+    public record UpdateCoreDetailsRequest(
+            @NotBlank String companyName,
+            String legalName,
+            String vatId
+    ) {
+    }
+
 }

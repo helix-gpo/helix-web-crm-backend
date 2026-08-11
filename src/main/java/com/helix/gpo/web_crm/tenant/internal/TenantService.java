@@ -75,4 +75,43 @@ class TenantService {
                 .orElseThrow(() -> new EntityNotFoundException("Tenant not found: " + id));
     }
 
+    TenantDtos.PartnerResponse addPartner(UUID tenantId, TenantDtos.CreatePartnerRequest request) {
+        Tenant tenant = getTenantOrThrow(tenantId);
+
+        Partner partner = Partner.builder()
+                .tenant(tenant)
+                .firstName(request.firstName())
+                .lastName(request.lastName())
+                .role(request.role())
+                .email(request.email())
+                .phone(request.phone())
+                .build();
+
+        return TenantMapper.toPartnerResponse(partnerRepository.save(partner));
+    }
+
+    TenantDtos.PartnerResponse updatePartner(UUID partnerId, TenantDtos.UpdatePartnerRequest request) {
+        Partner partner = getPartnerOrThrow(partnerId);
+        partner.updateDetails(request.firstName(), request.lastName(), request.role(), request.email(), request.phone());
+        return TenantMapper.toPartnerResponse(partner);
+    }
+
+    void removePartner(UUID partnerId) {
+        if (!partnerRepository.existsById(partnerId)) {
+            throw new EntityNotFoundException("Partner not found: " + partnerId);
+        }
+        partnerRepository.deleteById(partnerId);
+    }
+
+    private Partner getPartnerOrThrow(UUID partnerId) {
+        return partnerRepository.findById(partnerId)
+                .orElseThrow(() -> new EntityNotFoundException("Partner not found: " + partnerId));
+    }
+
+    TenantResponse updateCoreDetails(UUID id, TenantDtos.UpdateCoreDetailsRequest request) {
+        Tenant tenant = getTenantOrThrow(id);
+        tenant.updateCoreDetails(request.companyName(), request.legalName(), request.vatId());
+        return TenantMapper.toResponse(tenant);
+    }
+
 }
