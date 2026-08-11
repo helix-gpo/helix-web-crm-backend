@@ -11,5 +11,6 @@
 - dialogs (hover/active colors - colors in general)
 
 # wednesday:
-- projects cleaner
 - website visibility (testimonials + projects)
+- testimonials
+- invoices
