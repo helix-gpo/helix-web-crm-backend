@@ -10,7 +10,6 @@
 - clean code (annotations - no constructors etc. + sort methods)
 - dialogs (hover/active colors - colors in general)
 
-# tuesday:
+# wednesday:
 - projects cleaner
-- tag colors (modals + header [tenants, projects])
 - website visibility (testimonials + projects)
