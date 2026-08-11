@@ -1,5 +1,6 @@
 package com.helix.gpo.web_crm.project.internal.dto;
 
+import com.helix.gpo.web_crm.project.internal.MilestoneStatus;
 import com.helix.gpo.web_crm.project.internal.ProjectStatus;
 import com.helix.gpo.web_crm.shared.Money;
 import jakarta.validation.constraints.NotBlank;
@@ -67,6 +68,29 @@ public final class ProjectDtos {
             Instant createdAt,
             Instant updatedAt
     ) {
+    }
+
+    public record UpdateProjectRequest(
+            @NotBlank String title,
+            String description,
+            String fullDescription,
+            List<String> highlights,
+            List<ProjectTagDto> tags,
+            LocalDate startDate,
+            LocalDate endDate
+    ) {
+    }
+
+    public record UpdateMilestoneRequest(
+            @NotBlank String title,
+            String description,
+            LocalDate dueDate,
+            Money price,
+            @NotNull MilestoneStatus status
+    ) {
+    }
+
+    public record ChangeMilestoneStatusRequest(@NotNull MilestoneStatus status) {
     }
 
 }

@@ -3,6 +3,7 @@ package com.helix.gpo.web_crm.project.internal;
 import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,9 +50,32 @@ class ProjectController {
         return projectService.unpublishFromWebsite(id);
     }
 
+    @PatchMapping("/{id}")
+    ProjectResponse update(@PathVariable UUID id, @Valid @RequestBody UpdateProjectRequest request) {
+        return projectService.update(id, request);
+    }
+
     @PostMapping("/{id}/milestones")
     MilestoneResponse addMilestone(@PathVariable UUID id, @Valid @RequestBody AddMilestoneRequest request) {
         return projectService.addMilestone(id, request);
+    }
+
+    @PatchMapping("/{projectId}/milestones/{milestoneId}")
+    MilestoneResponse updateMilestone(@PathVariable UUID projectId, @PathVariable UUID milestoneId,
+                                      @Valid @RequestBody UpdateMilestoneRequest request) {
+        return projectService.updateMilestone(milestoneId, request);
+    }
+
+    @PatchMapping("/{projectId}/milestones/{milestoneId}/status")
+    MilestoneResponse changeMilestoneStatus(@PathVariable UUID projectId, @PathVariable UUID milestoneId,
+                                            @Valid @RequestBody ChangeMilestoneStatusRequest request) {
+        return projectService.changeMilestoneStatus(milestoneId, request);
+    }
+
+    @DeleteMapping("/{projectId}/milestones/{milestoneId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void removeMilestone(@PathVariable UUID projectId, @PathVariable UUID milestoneId) {
+        projectService.removeMilestone(milestoneId);
     }
 
 }

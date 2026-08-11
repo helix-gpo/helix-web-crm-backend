@@ -16,6 +16,7 @@ import java.util.UUID;
 class ProjectService {
 
     private final ProjectRepository projectRepository;
+    private final MilestoneRepository milestoneRepository;
     private final TenantApi tenantApi;
 
     ProjectResponse create(CreateProjectRequest request) {
@@ -76,6 +77,22 @@ class ProjectService {
         return ProjectMapper.toResponse(project);
     }
 
+    ProjectResponse update(UUID id, UpdateProjectRequest request) {
+        Project project = getProjectOrThrow(id);
+        project.updateDetails(
+                request.title(),
+                request.description(),
+                request.fullDescription(),
+                request.highlights(),
+                request.tags() != null
+                        ? request.tags().stream().map(t -> new ProjectTag(t.value(), t.colorHex())).toList()
+                        : List.of(),
+                request.startDate(),
+                request.endDate()
+        );
+        return ProjectMapper.toResponse(project);
+    }
+
     MilestoneResponse addMilestone(UUID projectId, AddMilestoneRequest request) {
         Project project = getProjectOrThrow(projectId);
         Milestone milestone = project.addMilestone(
@@ -91,6 +108,30 @@ class ProjectService {
     private Project getProjectOrThrow(UUID id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found: " + id));
+    }
+
+    MilestoneResponse updateMilestone(UUID milestoneId, UpdateMilestoneRequest request) {
+        Milestone milestone = getMilestoneOrThrow(milestoneId);
+        milestone.updateDetails(request.title(), request.description(), request.dueDate(), request.price(), request.status());
+        return ProjectMapper.toMilestoneResponse(milestone);
+    }
+
+    MilestoneResponse changeMilestoneStatus(UUID milestoneId, ChangeMilestoneStatusRequest request) {
+        Milestone milestone = getMilestoneOrThrow(milestoneId);
+        milestone.changeStatus(request.status());
+        return ProjectMapper.toMilestoneResponse(milestone);
+    }
+
+    void removeMilestone(UUID milestoneId) {
+        if (!milestoneRepository.existsById(milestoneId)) {
+            throw new EntityNotFoundException("Milestone not found: " + milestoneId);
+        }
+        milestoneRepository.deleteById(milestoneId);
+    }
+
+    private Milestone getMilestoneOrThrow(UUID id) {
+        return milestoneRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Milestone not found: " + id));
     }
 
 }

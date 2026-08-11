@@ -12,6 +12,5 @@
 
 # tuesday:
 - projects cleaner
-- login/logout
-- main page (welcome)
+- tag colors (modals + header [tenants, projects])
 - website visibility (testimonials + projects)

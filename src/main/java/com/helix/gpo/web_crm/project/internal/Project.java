@@ -78,6 +78,18 @@ class Project extends BaseEntity {
         this.visibleOnWebsite = false;
     }
 
+    public void updateDetails(String title, String description, String fullDescription,
+                              List<String> highlights, List<ProjectTag> tags,
+                              LocalDate startDate, LocalDate endDate) {
+        this.title = title;
+        this.description = description;
+        this.fullDescription = fullDescription;
+        this.highlights = highlights != null ? highlights : List.of();
+        this.tags = tags != null ? tags : List.of();
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
     public Milestone addMilestone(String title, String description, LocalDate dueDate, Money price) {
         Milestone milestone = Milestone.builder()
                 .project(this)

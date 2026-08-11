@@ -38,12 +38,20 @@ class Milestone extends BaseEntity {
     @Builder.Default
     private MilestoneStatus status = MilestoneStatus.PLANNED;
 
-    public void complete() {
-        this.status = MilestoneStatus.DONE;
-    }
-
     public void updatePrice(Money price) {
         this.price = price;
+    }
+
+    public void changeStatus(MilestoneStatus status) {
+        this.status = status;
+    }
+
+    public void updateDetails(String title, String description, LocalDate dueDate, Money price, MilestoneStatus status) {
+        this.title = title;
+        this.description = description;
+        this.dueDate = dueDate;
+        this.price = price;
+        this.status = status;
     }
 
 }
