@@ -5,6 +5,7 @@ import com.helix.gpo.web_crm.invoice.internal.LineItemSource;
 import com.helix.gpo.web_crm.shared.Address;
 import com.helix.gpo.web_crm.shared.Money;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
@@ -109,6 +110,21 @@ public final class InvoiceDtos {
             BillingPartyDto suggestedSeller,
             BillingPartyDto suggestedBuyer,
             List<MilestoneOptionDto> availableMilestones
+    ) {
+    }
+
+    public record UpdateInvoiceHeaderRequest(
+            String buyerReference,
+            Integer paymentTermsDays
+    ) {
+    }
+
+    public record UpdateLineItemRequest(
+            @NotBlank String description,
+            BigDecimal quantity,
+            String unitCode,
+            @NotNull Money unitPrice,
+            BigDecimal taxRatePercentage
     ) {
     }
 

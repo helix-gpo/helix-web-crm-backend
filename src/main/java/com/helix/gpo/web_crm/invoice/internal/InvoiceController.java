@@ -56,4 +56,21 @@ class InvoiceController {
         return invoiceService.issue(id, request);
     }
 
+    @PatchMapping("/{id}")
+    InvoiceResponse updateHeader(@PathVariable UUID id, @Valid @RequestBody UpdateInvoiceHeaderRequest request) {
+        return invoiceService.updateHeader(id, request);
+    }
+
+    @PatchMapping("/{id}/line-items/{lineItemId}")
+    InvoiceResponse updateLineItem(@PathVariable UUID id, @PathVariable UUID lineItemId,
+                                   @Valid @RequestBody UpdateLineItemRequest request) {
+        return invoiceService.updateLineItem(id, lineItemId, request);
+    }
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> delete(@PathVariable UUID id) {
+        invoiceService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

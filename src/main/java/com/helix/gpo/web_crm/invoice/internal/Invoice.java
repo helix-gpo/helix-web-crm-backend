@@ -5,6 +5,7 @@ import com.helix.gpo.web_crm.shared.Money;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -151,6 +152,31 @@ class Invoice extends BaseEntity {
         if (this.status != InvoiceStatus.DRAFT) {
             throw new IllegalStateException("Cannot modify line items on a non-draft invoice: " + getId());
         }
+    }
+    public void updateLineItem(UUID lineItemId, String description, BigDecimal quantity,
+                               String unitCode, Money unitPrice, BigDecimal taxRatePercentage) {
+        requireDraft();
+
+        InvoiceLineItem item = this.lineItems.stream()
+                .filter(li -> li.getId().equals(lineItemId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Line item not found: " + lineItemId));
+
+        if (description == null || unitPrice == null) {
+            throw new IllegalArgumentException("description and unitPrice are required");
+        }
+
+        item.setDescription(description);
+        item.setQuantity(quantity != null ? quantity : BigDecimal.ONE);
+        item.setUnitCode(unitCode != null ? unitCode : "C62");
+        item.setUnitPrice(unitPrice);
+        item.setTaxRatePercentage(taxRatePercentage != null ? taxRatePercentage : new BigDecimal("19.00"));
+    }
+
+    public void updateHeader(String buyerReference, Integer paymentTermsDays) {
+        requireDraft();
+        this.buyerReference = buyerReference;
+        this.paymentTermsDays = paymentTermsDays != null ? paymentTermsDays : 14;
     }
 
 }

@@ -14,10 +14,9 @@
 - connect testimonials with new crm
 
 # wednesday:
-- check kanban create project status
 - website visibility (testimonials + projects)
 - testimonials
-- invoices (delete only scripts, archive invoice)
-  - delete only drafts + "archive" invoices
-  - label for not finished milestones (not ready - but able to be added to draft)
+- invoices
+  - think of cancel flow
+  - preview invoice
   - milestones in invoices → not able to send other invoice with milestone

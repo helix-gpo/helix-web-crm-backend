@@ -191,4 +191,31 @@ class InvoiceService {
                 .orElseThrow(() -> new EntityNotFoundException("Invoice not found: " + id));
     }
 
+    InvoiceResponse updateHeader(UUID invoiceId, UpdateInvoiceHeaderRequest request) {
+        Invoice invoice = getInvoiceOrThrow(invoiceId);
+        invoice.updateHeader(request.buyerReference(), request.paymentTermsDays());
+        return InvoiceMapper.toResponse(invoiceRepository.save(invoice));
+    }
+
+    InvoiceResponse updateLineItem(UUID invoiceId, UUID lineItemId, UpdateLineItemRequest request) {
+        Invoice invoice = getInvoiceOrThrow(invoiceId);
+        invoice.updateLineItem(
+                lineItemId,
+                request.description(),
+                request.quantity(),
+                request.unitCode(),
+                request.unitPrice(),
+                request.taxRatePercentage()
+        );
+        return InvoiceMapper.toResponse(invoiceRepository.save(invoice));
+    }
+
+    void delete(UUID invoiceId) {
+        Invoice invoice = getInvoiceOrThrow(invoiceId);
+        if (invoice.getStatus() != InvoiceStatus.DRAFT) {
+            throw new IllegalStateException("Cannot delete a non-draft invoice: " + invoiceId);
+        }
+        invoiceRepository.delete(invoice);
+    }
+
 }
