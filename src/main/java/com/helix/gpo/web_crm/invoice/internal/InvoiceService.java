@@ -14,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -110,17 +112,29 @@ class InvoiceService {
         List<MilestoneSummary> milestones = projectApi.findMilestoneSummariesByProject(projectId);
 
         List<UUID> milestoneIds = milestones.stream().map(MilestoneSummary::id).toList();
-        List<UUID> invoicedMilestoneIds = invoiceLineItemRepository.findAllByMilestoneIdIn(milestoneIds).stream()
+        List<InvoiceLineItem> lineItems = invoiceLineItemRepository.findAllByMilestoneIdIn(milestoneIds);
+
+        // Nur ISSUED (oder später) zählt als "wirklich abgerechnet" - DRAFT-Rechnungen
+        // sind noch nicht verbindlich, dürfen den Meilenstein also nicht dauerhaft sperren
+        Set<UUID> invoicedMilestoneIds = lineItems.stream()
+                .filter(li -> li.getInvoice().getStatus() != InvoiceStatus.DRAFT)
                 .map(InvoiceLineItem::getMilestoneId)
-                .toList();
+                .collect(Collectors.toSet());
+
+        Set<UUID> draftMilestoneIds = lineItems.stream()
+                .filter(li -> li.getInvoice().getStatus() == InvoiceStatus.DRAFT)
+                .map(InvoiceLineItem::getMilestoneId)
+                .collect(Collectors.toSet());
 
         return milestones.stream()
                 .map(m -> new MilestoneOptionDto(
                         m.id(),
                         m.title(),
-                        null, // dueDate nicht in MilestoneSummary enthalten - siehe Hinweis unten
+                        null,
                         m.price(),
-                        invoicedMilestoneIds.contains(m.id())
+                        invoicedMilestoneIds.contains(m.id()),
+                        draftMilestoneIds.contains(m.id()),
+                        m.status()
                 ))
                 .toList();
     }

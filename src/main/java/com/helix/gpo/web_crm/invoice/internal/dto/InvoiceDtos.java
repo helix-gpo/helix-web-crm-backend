@@ -99,7 +99,9 @@ public final class InvoiceDtos {
             String title,
             LocalDate dueDate,
             Money price,
-            boolean alreadyInvoiced
+            boolean alreadyInvoiced,
+            boolean inDraftInvoice,
+            String milestoneStatus
     ) {
     }
 

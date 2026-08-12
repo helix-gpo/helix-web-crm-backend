@@ -11,9 +11,13 @@
 - dialogs (hover/active colors - colors in general)
 - toast if error
 - optimize date picker
+- connect testimonials with new crm
 
 # wednesday:
 - check kanban create project status
 - website visibility (testimonials + projects)
 - testimonials
-- invoices
+- invoices (delete only scripts, archive invoice)
+  - delete only drafts + "archive" invoices
+  - label for not finished milestones (not ready - but able to be added to draft)
+  - milestones in invoices → not able to send other invoice with milestone
