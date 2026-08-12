@@ -11,4 +11,6 @@ interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
     List<Invoice> findAllByProjectId(UUID projectId);
 
+    long countByTenantId(UUID tenantId);
+
 }

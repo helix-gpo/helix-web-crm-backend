@@ -25,6 +25,7 @@ class TenantService {
                 .companyName(request.companyName())
                 .legalName(request.legalName())
                 .vatId(request.vatId())
+                .referenceCode(request.referenceCode())
                 .address(request.address())
                 .contactEmail(request.contactEmail())
                 .contactPhone(request.contactPhone())
@@ -110,7 +111,7 @@ class TenantService {
 
     TenantResponse updateCoreDetails(UUID id, TenantDtos.UpdateCoreDetailsRequest request) {
         Tenant tenant = getTenantOrThrow(id);
-        tenant.updateCoreDetails(request.companyName(), request.legalName(), request.vatId());
+        tenant.updateCoreDetails(request.companyName(), request.legalName(), request.vatId(), request.referenceCode());
         return TenantMapper.toResponse(tenant);
     }
 

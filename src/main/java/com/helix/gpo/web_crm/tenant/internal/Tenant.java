@@ -20,6 +20,9 @@ class Tenant extends BaseEntity {
     @Column(length = 160)
     private String legalName;
 
+    @Column(name = "reference_code", length = 12)
+    private String referenceCode;
+
     @Column(name = "vat_id", length = 20)
     private String vatId;
 
@@ -56,10 +59,11 @@ class Tenant extends BaseEntity {
         this.address = address;
     }
 
-    public void updateCoreDetails(String companyName, String legalName, String vatId) {
+    public void updateCoreDetails(String companyName, String legalName, String vatId, String referenceCode) {
         this.companyName = companyName;
         this.legalName = legalName;
         this.vatId = vatId;
+        this.referenceCode = referenceCode;
     }
 
 }

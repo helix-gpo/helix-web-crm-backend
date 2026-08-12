@@ -17,6 +17,7 @@ public final class TenantDtos {
             @NotBlank String companyName,
             String legalName,
             String vatId,
+            String referenceCode,
             Address address,
             @Email String contactEmail,
             String contactPhone
@@ -30,11 +31,20 @@ public final class TenantDtos {
     ) {
     }
 
+    public record UpdateCoreDetailsRequest(
+            @NotBlank String companyName,
+            String legalName,
+            String vatId,
+            String referenceCode
+    ) {
+    }
+
     public record TenantResponse(
             UUID id,
             String companyName,
             String legalName,
             String vatId,
+            String referenceCode,
             Address address,
             String contactEmail,
             String contactPhone,
@@ -70,13 +80,6 @@ public final class TenantDtos {
             String role,
             @Email String email,
             String phone
-    ) {
-    }
-
-    public record UpdateCoreDetailsRequest(
-            @NotBlank String companyName,
-            String legalName,
-            String vatId
     ) {
     }
 

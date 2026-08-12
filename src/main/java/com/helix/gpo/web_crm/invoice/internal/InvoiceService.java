@@ -34,10 +34,14 @@ class InvoiceService {
         TenantBillingDetails tenant = tenantApi.findBillingDetailsById(request.tenantId())
                 .orElseThrow(() -> new EntityNotFoundException("Tenant not found: " + request.tenantId()));
 
+        String buyerReference = request.buyerReference() != null && !request.buyerReference().isBlank()
+                ? request.buyerReference()
+                : generateAutoReference(tenant);
+
         Invoice invoice = Invoice.builder()
                 .tenantId(request.tenantId())
                 .projectId(request.projectId())
-                .buyerReference(request.buyerReference())
+                .buyerReference(buyerReference)
                 .paymentTermsDays(request.paymentTermsDays() != null ? request.paymentTermsDays() : 14)
                 .seller(InvoiceMapper.toSellerSnapshot(companyBillingProperties))
                 .buyer(InvoiceMapper.toBuyerSnapshot(tenant))
@@ -46,6 +50,14 @@ class InvoiceService {
         request.lineItems().forEach(item -> appendLineItem(invoice, item));
 
         return InvoiceMapper.toResponse(invoiceRepository.save(invoice));
+    }
+
+    private String generateAutoReference(TenantBillingDetails tenant) {
+        if (tenant.referenceCode() == null || tenant.referenceCode().isBlank()) {
+            return null; // kein Kürzel gepflegt - keine automatische Referenz möglich
+        }
+        long existingCount = invoiceRepository.countByTenantId(tenant.tenantId());
+        return tenant.referenceCode() + "." + (existingCount + 1);
     }
 
     InvoiceResponse addLineItem(UUID invoiceId, LineItemRequest request) {

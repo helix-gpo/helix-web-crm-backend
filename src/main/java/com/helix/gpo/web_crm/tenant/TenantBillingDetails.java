@@ -9,6 +9,7 @@ public record TenantBillingDetails(
         String companyName,
         String legalName,
         String vatId,
+        String referenceCode,
         Address address,
         String contactEmail
 ) {

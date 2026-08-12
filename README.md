@@ -20,3 +20,4 @@
   - think of cancel flow
   - preview invoice
   - milestones in invoices → not able to send other invoice with milestone
+  - check both sequences of invoice when issuing

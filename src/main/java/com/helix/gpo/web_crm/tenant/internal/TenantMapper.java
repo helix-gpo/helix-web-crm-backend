@@ -16,6 +16,7 @@ final class TenantMapper {
                 tenant.getCompanyName(),
                 tenant.getLegalName(),
                 tenant.getVatId(),
+                tenant.getReferenceCode(),
                 tenant.getAddress(),
                 tenant.getContactEmail(),
                 tenant.getContactPhone(),
@@ -25,6 +26,7 @@ final class TenantMapper {
                 tenant.getUpdatedAt()
         );
     }
+
 
     static TenantSummary toSummary(Tenant tenant) {
         return new TenantSummary(
@@ -40,6 +42,7 @@ final class TenantMapper {
                 tenant.getCompanyName(),
                 tenant.getLegalName(),
                 tenant.getVatId(),
+                tenant.getReferenceCode(),
                 tenant.getAddress(),
                 tenant.getContactEmail()
         );
