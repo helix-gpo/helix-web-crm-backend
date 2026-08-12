@@ -33,6 +33,7 @@ class ProjectService {
                 .tags(request.tags() != null
                         ? request.tags().stream().map(t -> new ProjectTag(t.value(), t.colorHex())).toList()
                         : List.of())
+                .status(request.status() != null ? request.status() : ProjectStatus.LEAD)
                 .startDate(request.startDate())
                 .endDate(request.endDate())
                 .build();

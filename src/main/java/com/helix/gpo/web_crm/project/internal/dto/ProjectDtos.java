@@ -27,7 +27,8 @@ public final class ProjectDtos {
             List<String> highlights,
             List<ProjectTagDto> tags,
             LocalDate startDate,
-            LocalDate endDate
+            LocalDate endDate,
+            ProjectStatus status
     ) {
     }
 
