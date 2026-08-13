@@ -18,7 +18,7 @@ class InvoiceSequence {
     @Column(name = "sequence_year")
     private int year;
 
-    @Column(name = "last_value", nullable = false)
+    @Column(name = "current_value", nullable = false)
     private long lastValue;
 
     InvoiceSequence(int year) {

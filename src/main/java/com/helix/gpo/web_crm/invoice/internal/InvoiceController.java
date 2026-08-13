@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -71,6 +72,11 @@ class InvoiceController {
     ResponseEntity<Void> delete(@PathVariable UUID id) {
         invoiceService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/document")
+    Map<String, String> documentUrl(@PathVariable UUID id) {
+        return Map.of("url", invoiceService.getDocumentUrl(id));
     }
 
 }

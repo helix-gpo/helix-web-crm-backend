@@ -5,6 +5,7 @@ import com.helix.gpo.web_crm.invoice.internal.dto.InvoiceDtos.*;
 import com.helix.gpo.web_crm.project.MilestoneSummary;
 import com.helix.gpo.web_crm.project.ProjectApi;
 import com.helix.gpo.web_crm.shared.Money;
+import com.helix.gpo.web_crm.storage.StorageApi;
 import com.helix.gpo.web_crm.tenant.TenantApi;
 import com.helix.gpo.web_crm.tenant.TenantBillingDetails;
 import jakarta.persistence.EntityNotFoundException;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +31,8 @@ class InvoiceService {
     private final TenantApi tenantApi;
     private final ProjectApi projectApi;
     private final CompanyBillingProperties companyBillingProperties;
+    private final StorageApi storageApi;
+    private final InvoicePdfService invoicePdfService;
 
     InvoiceResponse create(CreateInvoiceRequest request) {
         TenantBillingDetails tenant = tenantApi.findBillingDetailsById(request.tenantId())
@@ -75,11 +79,25 @@ class InvoiceService {
     InvoiceResponse issue(UUID invoiceId, IssueInvoiceRequest request) {
         Invoice invoice = getInvoiceOrThrow(invoiceId);
         LocalDate issueDate = request != null && request.issueDate() != null ? request.issueDate() : LocalDate.now();
-
         String invoiceNumber = invoiceNumberGenerator.generateNext();
-        invoice.issue(invoiceNumber, issueDate);
 
-        return InvoiceMapper.toResponse(invoice);
+        invoice.issue(invoiceNumber, issueDate);
+        invoiceRepository.save(invoice);
+
+        byte[] pdf = invoicePdfService.render(invoice);
+        String documentKey = "invoices/" + invoice.getId() + "/" + invoiceNumber + ".pdf";
+        storageApi.upload(documentKey, pdf, "application/pdf");
+        invoice.attachDocument(documentKey);
+
+        return InvoiceMapper.toResponse(invoiceRepository.save(invoice));
+    }
+
+    String getDocumentUrl(UUID invoiceId) {
+        Invoice invoice = getInvoiceOrThrow(invoiceId);
+        if (invoice.getDocumentKey() == null) {
+            throw new IllegalStateException("Für diese Rechnung existiert noch kein Dokument: " + invoiceId);
+        }
+        return storageApi.presignedUrl(invoice.getDocumentKey(), Duration.ofMinutes(15));
     }
 
     @Transactional(readOnly = true)

@@ -138,6 +138,13 @@ class Invoice extends BaseEntity {
                 .reduce(new Money(java.math.BigDecimal.ZERO, currencyCode), Money::add);
     }
 
+    @Column(name = "document_key", length = 200)
+    private String documentKey;
+
+    public void attachDocument(String documentKey) {
+        this.documentKey = documentKey;
+    }
+
     public void issue(String invoiceNumber, LocalDate issueDate) {
         if (this.lineItems.isEmpty()) {
             throw new IllegalStateException("Cannot issue an invoice without line items: " + getId());

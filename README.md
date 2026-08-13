@@ -12,6 +12,7 @@
 - toast if error
 - optimize date picker
 - connect testimonials with new crm
+- before deployment: env table (with bank details etc.!)
 
 # wednesday:
 - website visibility (testimonials + projects)
@@ -21,3 +22,4 @@
   - preview invoice
   - milestones in invoices → not able to send other invoice with milestone
   - check both sequences of invoice when issuing
+  - create invoice over project

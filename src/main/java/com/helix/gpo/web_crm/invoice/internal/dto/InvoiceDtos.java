@@ -88,6 +88,7 @@ public final class InvoiceDtos {
             Money netTotal,
             Money taxTotal,
             Money grossTotal,
+            String documentKey,
             Instant createdAt,
             Instant updatedAt
     ) {

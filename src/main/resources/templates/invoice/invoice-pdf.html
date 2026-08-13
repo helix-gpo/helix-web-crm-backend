@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            color: #1a1a1a;
+            font-size: 10px;
+            margin: 0;
+        }
+
+        .header {
+            width: 100%;
+        }
+
+        .header td {
+            vertical-align: top;
+        }
+
+        .logo-img {
+            width: 20mm;
+            height: 20mm;
+        }
+
+        .company-name {
+            font-size: 15px;
+            font-weight: bold;
+            color: #0d1424;
+            margin: 0 0 2px 0;
+        }
+
+        .company-tagline {
+            font-size: 8px;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .seller-block {
+            text-align: right;
+            font-size: 9px;
+            color: #6b7280;
+        }
+
+        .seller-block strong {
+            color: #1a1a1a;
+            font-size: 9px;
+        }
+
+        .gradient-line {
+            width: 100%;
+            height: 2px;
+            margin: 12px 0 16px 0;
+            background: linear-gradient(90deg, #03dbff 0%, #fc03d5 100%);
+        }
+
+        .meta-table {
+            width: 100%;
+            margin-bottom: 18px;
+        }
+
+        .meta-table td {
+            font-size: 9.5px;
+            padding: 2px 0;
+        }
+
+        .meta-label {
+            font-size: 8px;
+            font-weight: bold;
+            color: #6b7280;
+            letter-spacing: 0.5px;
+        }
+
+        .meta-value-strong {
+            font-size: 11px;
+            font-weight: bold;
+            color: #1a1a1a;
+        }
+
+        .meta-grey {
+            color: #6b7280;
+        }
+
+        .align-right {
+            text-align: right;
+        }
+
+        table.positions {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        table.positions thead td {
+            background-color: #0d1424;
+            color: #ffffff;
+            font-size: 8px;
+            font-weight: bold;
+            padding: 7px 6px;
+        }
+
+        table.positions tbody td {
+            padding: 8px 6px;
+            font-size: 9.5px;
+            border-bottom: 1px solid #e8eaed;
+        }
+
+        table.positions tbody tr:nth-child(even) {
+            background-color: #f7f8fa;
+        }
+
+        .col-pos {
+            width: 5%;
+            color: #6b7280;
+        }
+
+        .col-desc {
+            width: 45%;
+        }
+
+        .col-qty, .col-price, .col-tax, .col-total {
+            text-align: right;
+            width: 12.5%;
+        }
+
+        .col-tax {
+            color: #6b7280;
+        }
+
+        .col-total {
+            font-weight: bold;
+        }
+
+        .summary-table {
+            width: 55%;
+            margin-left: 45%;
+            margin-top: 16px;
+        }
+
+        .summary-table td {
+            font-size: 9.5px;
+            padding: 3px 0;
+        }
+
+        .summary-table .muted {
+            color: #6b7280;
+            font-size: 9px;
+        }
+
+        .summary-divider {
+            border-top: 1px solid #0d1424;
+        }
+
+        .total-row td {
+            background-color: #0d1424;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 11px;
+            padding: 8px 10px;
+        }
+
+        .total-value {
+            color: #03dbff;
+            text-align: right;
+        }
+
+        .footer {
+            margin-top: 40px;
+            border-top: 1px solid #e8eaed;
+            padding-top: 12px;
+            font-size: 9px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+
+<table class="header">
+    <tr>
+        <td style="width: 20mm;">
+            <img class="logo-img" th:src="'data:image/png;base64,' + ${logoBase64}"/>
+        </td>
+        <td>
+            <p class="company-name">HELIX GPO</p>
+            <p class="company-tagline">Digital Transformation Agency</p>
+        </td>
+        <td class="seller-block">
+            <strong th:text="${seller.name}">Helix GPO UG</strong><br/>
+            <span th:text="${sellerAddressLine}">Erftstraße 50, 41460 Neuss</span><br/>
+            <span th:text="${seller.email} + ' · USt-IdNr. ' + ${seller.vatId}"></span>
+        </td>
+    </tr>
+</table>
+
+<div class="gradient-line"></div>
+
+<table class="meta-table">
+    <tr>
+        <td class="meta-label">RECHNUNGSEMPFÄNGER</td>
+        <td></td>
+        <td class="align-right meta-label">RECHNUNG</td>
+    </tr>
+    <tr>
+        <td class="meta-value-strong" th:text="${buyer.name}">Kunde GmbH</td>
+        <td></td>
+        <td class="align-right meta-value-strong" th:text="'Nr. ' + ${invoiceNumber}"></td>
+    </tr>
+    <tr>
+        <td class="meta-grey" th:text="${buyerAddressLine}"></td>
+        <td></td>
+        <td class="align-right meta-grey" th:text="'Datum: ' + ${issueDate}"></td>
+    </tr>
+    <tr>
+        <td class="meta-grey" th:text="'USt-IdNr.: ' + ${buyer.vatId}"></td>
+        <td></td>
+        <td class="align-right meta-grey" th:text="'Fällig: ' + ${dueDate}"></td>
+    </tr>
+    <tr th:if="${buyerReference}">
+        <td></td>
+        <td></td>
+        <td class="align-right meta-grey" th:text="'Referenz: ' + ${buyerReference}"></td>
+    </tr>
+</table>
+
+<table class="positions">
+    <thead>
+    <tr>
+        <td class="col-pos">#</td>
+        <td class="col-desc">BESCHREIBUNG</td>
+        <td class="col-qty">MENGE</td>
+        <td class="col-price">EINZELPREIS</td>
+        <td class="col-tax">USt</td>
+        <td class="col-total">GESAMT</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item : ${lineItems}">
+        <td class="col-pos" th:text="${item.positionNumber}"></td>
+        <td class="col-desc" th:text="${item.description}"></td>
+        <td class="col-qty" th:text="${item.quantity}"></td>
+        <td class="col-price" th:text="${item.unitPriceFormatted}"></td>
+        <td class="col-tax" th:text="${item.taxRatePercentage} + ' %'"></td>
+        <td class="col-total" th:text="${item.grossAmountFormatted}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<table class="summary-table">
+    <tr>
+        <td class="muted">Netto gesamt</td>
+        <td class="align-right" th:text="${netTotalFormatted}"></td>
+    </tr>
+    <tr th:each="group : ${taxBreakdown}">
+        <td class="muted" th:text="'USt ' + ${group.rate} + ' % auf ' + ${group.netFormatted}"></td>
+        <td class="align-right muted" th:text="${group.taxFormatted}"></td>
+    </tr>
+    <tr>
+        <td colspan="2" class="summary-divider"></td>
+    </tr>
+    <tr class="total-row">
+        <td>Rechnungsbetrag</td>
+        <td class="total-value" th:text="${grossTotalFormatted}"></td>
+    </tr>
+</table>
+
+<div class="footer">
+    <p th:text="'Zahlbar innerhalb von ' + ${paymentTermsDays} + ' Tagen ohne Abzüge.'"></p>
+    <p th:if="${buyerReference}" th:text="'Verwendungszweck: ' + ${invoiceNumber}"></p>
+    <p th:text="${sellerName} + ' · IBAN ' + ${seller.iban} + ' · BIC ' + ${seller.bic}"></p>
+</div>
+
+</body>
+</html>

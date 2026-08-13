@@ -67,6 +67,7 @@ final class InvoiceMapper {
                 invoice.netTotal(),
                 invoice.taxTotal(),
                 invoice.grossTotal(),
+                invoice.getDocumentKey(),
                 invoice.getCreatedAt(),
                 invoice.getUpdatedAt()
         );

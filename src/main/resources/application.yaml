@@ -52,3 +52,6 @@ helix:
     public-ip-allowlist: ${PUBLIC_IP_ALLOWLIST}
     cognito:
       client-id: ${COGNITO_CLIENT_ID}
+  s3:
+    bucket: ${S3_BUCKET_NAME}
+    region: eu-central-1
