@@ -15,6 +15,8 @@ import java.util.UUID;
 @Transactional
 class ProjectService {
 
+    private static final int MAX_VISIBLE_ON_WEBSITE = 6;
+
     private final ProjectRepository projectRepository;
     private final MilestoneRepository milestoneRepository;
     private final TenantApi tenantApi;
@@ -68,6 +70,12 @@ class ProjectService {
 
     ProjectResponse publishOnWebsite(UUID id) {
         Project project = getProjectOrThrow(id);
+
+        if (!project.isVisibleOnWebsite() && projectRepository.countByVisibleOnWebsiteTrue() >= MAX_VISIBLE_ON_WEBSITE) {
+            throw new IllegalStateException(
+                    "Es können maximal " + MAX_VISIBLE_ON_WEBSITE + " Projekte gleichzeitig auf der Website sichtbar sein");
+        }
+
         project.publishOnWebsite();
         return ProjectMapper.toResponse(project);
     }

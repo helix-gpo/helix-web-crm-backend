@@ -41,6 +41,16 @@ class TestimonialController {
         return testimonialService.reject(id);
     }
 
+    @PostMapping("/api/crm/testimonials/{id}/publish")
+    TestimonialResponse publish(@PathVariable UUID id) {
+        return testimonialService.publish(id);
+    }
+
+    @PostMapping("/api/crm/testimonials/{id}/unpublish")
+    TestimonialResponse unpublish(@PathVariable UUID id) {
+        return testimonialService.unpublish(id);
+    }
+
     // ---- Öffentlich (Website-Feedback-Formular), Legitimation via Token statt API-Key ----
 
     @PostMapping("/api/public/testimonials/submit")

@@ -8,6 +8,8 @@
 - optimize date picker
 - connect website testimonials with new crm
 - before deployment: env table (with bank details etc.!)
+- tenant/project additional information
+- refresh-token duration
 
 # wednesday:
 - website visibility (testimonials + projects)
@@ -20,3 +22,5 @@
 - invoices:
   - sent automatically after issuing via mail (more email fields on partners - choice via checkbox)
   - .xml file for e-invoice sent as well
+- website visibility:
+  - with preview opportunity

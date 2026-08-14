@@ -19,6 +19,10 @@ class TestimonialService {
 
     private static final int DEFAULT_EXPIRY_DAYS = 30;
 
+    // Gleiche redaktionelle Obergrenze wie bei Projekten - Website-Sektion
+    // "Referenzen" zeigt maximal 6 Karten
+    private static final int MAX_VISIBLE_ON_WEBSITE = 6;
+
     private final TestimonialInvitationRepository invitationRepository;
     private final TestimonialRepository testimonialRepository;
     private final TokenGenerator tokenGenerator;
@@ -95,6 +99,29 @@ class TestimonialService {
         return TestimonialMapper.toResponse(testimonial);
     }
 
+    TestimonialResponse publish(UUID id) {
+        Testimonial testimonial = getOrThrow(id);
+
+        if (testimonial.getStatus() != TestimonialStatus.APPROVED) {
+            throw new IllegalStateException(
+                    "Nur freigegebene Referenzen können auf der Website veröffentlicht werden: " + id);
+        }
+
+        if (!testimonial.isVisibleOnWebsite() && testimonialRepository.countByVisibleOnWebsiteTrue() >= MAX_VISIBLE_ON_WEBSITE) {
+            throw new IllegalStateException(
+                    "Es können maximal " + MAX_VISIBLE_ON_WEBSITE + " Referenzen gleichzeitig auf der Website sichtbar sein");
+        }
+
+        testimonial.publish();
+        return TestimonialMapper.toResponse(testimonial);
+    }
+
+    TestimonialResponse unpublish(UUID id) {
+        Testimonial testimonial = getOrThrow(id);
+        testimonial.unpublish();
+        return TestimonialMapper.toResponse(testimonial);
+    }
+
     @Transactional(readOnly = true)
     List<TestimonialResponse> findAll() {
         return testimonialRepository.findAll().stream()
@@ -111,7 +138,7 @@ class TestimonialService {
 
     @Transactional(readOnly = true)
     List<TestimonialResponse> findAllVisibleOnWebsite() {
-        return testimonialRepository.findAllByVisibleOnWebsiteTrue().stream()
+        return testimonialRepository.findAllByVisibleOnWebsiteTrueOrderByCreatedAtDesc(true).stream()
                 .map(TestimonialMapper::toResponse)
                 .toList();
     }

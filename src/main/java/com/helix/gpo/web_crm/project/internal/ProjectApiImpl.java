@@ -44,7 +44,7 @@ class ProjectApiImpl implements ProjectApi {
 
     @Override
     public List<PublicProjectSummary> findAllVisibleOnWebsite() {
-        return projectRepository.findAllByVisibleOnWebsiteTrue().stream()
+        return projectRepository.findAllByVisibleOnWebsiteTrueOrderByCreatedAtDesc(true).stream()
                 .map(ProjectMapper::toPublicSummary)
                 .toList();
     }

@@ -15,7 +15,7 @@ class TestimonialApiImpl implements TestimonialApi {
 
     @Override
     public List<TestimonialSummary> findAllVisibleOnWebsite() {
-        return testimonialRepository.findAllByVisibleOnWebsiteTrue().stream()
+        return testimonialRepository.findAllByVisibleOnWebsiteTrueOrderByCreatedAtDesc(true).stream()
                 .map(TestimonialMapper::toSummary)
                 .toList();
     }

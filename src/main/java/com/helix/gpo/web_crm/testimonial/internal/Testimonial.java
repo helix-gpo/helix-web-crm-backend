@@ -56,11 +56,18 @@ class Testimonial extends BaseEntity {
 
     public void approve() {
         this.status = TestimonialStatus.APPROVED;
-        this.visibleOnWebsite = true;
     }
 
     public void reject() {
         this.status = TestimonialStatus.REJECTED;
+        this.visibleOnWebsite = false;
+    }
+
+    public void publish() {
+        this.visibleOnWebsite = true;
+    }
+
+    public void unpublish() {
         this.visibleOnWebsite = false;
     }
 
