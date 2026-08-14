@@ -13,15 +13,29 @@ class CorsConfig {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+        CorsConfiguration crmConfiguration = new CorsConfiguration();
         // Lokale CRM-SPA - produktive Domain (z.B. https://crm.helix-gpo.com) hier später ergänzen
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true);
+        crmConfiguration.setAllowedOrigins(List.of("http://localhost:4200"));
+        crmConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        crmConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        crmConfiguration.setAllowCredentials(true);
+
+        // Öffentliche Website - kein Auth-Header, daher allowCredentials(false).
+        // localhost:4201, weil die Website standardmäßig auch auf 4200 laufen
+        // würde (Konflikt mit dem CRM-Dev-Server) - siehe Hinweis unten
+        CorsConfiguration publicConfiguration = new CorsConfiguration();
+        publicConfiguration.setAllowedOrigins(List.of(
+                "http://localhost:4201",
+                "https://helix-gpo.com",
+                "https://www.helix-gpo.com"
+        ));
+        publicConfiguration.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
+        publicConfiguration.setAllowedHeaders(List.of("Content-Type"));
+        publicConfiguration.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/crm/**", configuration);
+        source.registerCorsConfiguration("/api/crm/**", crmConfiguration);
+        source.registerCorsConfiguration("/api/public/**", publicConfiguration);
         return source;
     }
 

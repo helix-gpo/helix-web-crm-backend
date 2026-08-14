@@ -10,10 +10,8 @@ interface ProjectRepository extends JpaRepository<Project, UUID> {
 
     List<Project> findAllByTenantId(UUID tenantId);
 
-    List<Project> findAllByVisibleOnWebsiteTrue();
-
     long countByVisibleOnWebsiteTrue();
 
-    List<Project> findAllByVisibleOnWebsiteTrueOrderByCreatedAtDesc(boolean visibleOnWebsite);
+    List<Project> findAllByVisibleOnWebsiteTrueOrderByCreatedAtDesc();
 
 }

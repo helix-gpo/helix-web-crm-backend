@@ -6,6 +6,7 @@ import com.helix.gpo.web_crm.project.ProjectSummary;
 import com.helix.gpo.web_crm.project.PublicProjectSummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,9 +43,13 @@ class ProjectApiImpl implements ProjectApi {
                 .toList();
     }
 
+    // @Transactional nötig, weil toPublicSummary() auf tags/highlights
+    // zugreift - beides @ElementCollection und damit lazy geladen. Ohne
+    // offene Session hier: LazyInitializationException -> 500
     @Override
+    @Transactional(readOnly = true)
     public List<PublicProjectSummary> findAllVisibleOnWebsite() {
-        return projectRepository.findAllByVisibleOnWebsiteTrueOrderByCreatedAtDesc(true).stream()
+        return projectRepository.findAllByVisibleOnWebsiteTrueOrderByCreatedAtDesc().stream()
                 .map(ProjectMapper::toPublicSummary)
                 .toList();
     }

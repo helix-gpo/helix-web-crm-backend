@@ -10,10 +10,8 @@ interface TestimonialRepository extends JpaRepository<Testimonial, UUID> {
 
     List<Testimonial> findAllByTenantId(UUID tenantId);
 
-    List<Testimonial> findAllByVisibleOnWebsiteTrue();
-
     long countByVisibleOnWebsiteTrue();
 
-    List<Testimonial> findAllByVisibleOnWebsiteTrueOrderByCreatedAtDesc(boolean visibleOnWebsite);
+    List<Testimonial> findAllByVisibleOnWebsiteTrueOrderByCreatedAtDesc();
 
 }

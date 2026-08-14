@@ -138,7 +138,7 @@ class TestimonialService {
 
     @Transactional(readOnly = true)
     List<TestimonialResponse> findAllVisibleOnWebsite() {
-        return testimonialRepository.findAllByVisibleOnWebsiteTrueOrderByCreatedAtDesc(true).stream()
+        return testimonialRepository.findAllByVisibleOnWebsiteTrueOrderByCreatedAtDesc().stream()
                 .map(TestimonialMapper::toResponse)
                 .toList();
     }

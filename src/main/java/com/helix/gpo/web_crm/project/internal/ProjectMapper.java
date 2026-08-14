@@ -74,9 +74,9 @@ final class ProjectMapper {
                 project.getTitle(),
                 project.getDescription(),
                 project.getFullDescription(),
-                project.getHighlights(),
+                List.copyOf(project.getHighlights()),
                 project.getTags().stream()
-                        .map(tag -> new com.helix.gpo.web_crm.project.PublicProjectSummary.ProjectTagView(
+                        .map(tag -> new PublicProjectSummary.ProjectTagView(
                                 tag.value(), tag.colorHex()))
                         .toList(),
                 project.getStartDate()

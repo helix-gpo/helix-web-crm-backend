@@ -10,12 +10,12 @@
 - before deployment: env table (with bank details etc.!)
 - tenant/project additional information
 - refresh-token duration
+- project images
 
 # wednesday:
-- website visibility (testimonials + projects)
-- testimonials
 - invoices
   - draft preview
+  - issuing with possibility to send email (new status - sent)
   - milestones in invoices → not able to send other invoice with milestone - not suggested in invoice creation
 
 # future:
