@@ -1,30 +1,27 @@
 # todos:
-- employee-module
-- messaging (notification) module - think of corresponding functionalities
 - cron jobs + validation
 - clean code (annotations - no constructors etc. + sort methods)
 - dialogs (hover/active colors - colors in general)
-- toast if error
 - optimize date picker
-- connect website testimonials with new crm
 - before deployment: env table (with bank details etc.!)
-- tenant/project additional information
 - refresh-token duration
-- project images
 - n8n-ai
 
-# wednesday:
+# now:
 - invoices
-  - draft preview
-  - issuing with possibility to send email (new status - sent)
+  - issuing with possibility to directly send email via checkbox (new status - sent)
+  - modal point for sending mail (if status != sent)
   - milestones in invoices → not able to send other invoice with milestone - not suggested in invoice creation
+  - ref automatically still wrong
 - testimonials
-  - send invitation link via email
+  - send invitation link via email (status for project/partner)
 - toast for every error/success
+- notification module for sending (email)
+- s3 for all resources
+- tenants + projects
+  - additional information
 
 # future:
 - invoices:
-  - sent automatically after issuing via mail (more email fields on partners - choice via checkbox)
   - .xml file for e-invoice sent as well
-- website visibility:
-  - with preview opportunity
+- employee-module
