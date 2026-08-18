@@ -20,6 +20,7 @@
 - s3 for all resources
 - tenants + projects
   - additional information
+- mail designs
 
 # future:
 - invoices:

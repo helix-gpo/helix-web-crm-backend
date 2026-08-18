@@ -79,4 +79,9 @@ class InvoiceController {
         return Map.of("url", invoiceService.getDocumentUrl(id));
     }
 
+    @PostMapping("/{id}/send")
+    InvoiceResponse send(@PathVariable UUID id, @RequestBody(required = false) SendInvoiceRequest request) {
+        return invoiceService.send(id, request);
+    }
+
 }

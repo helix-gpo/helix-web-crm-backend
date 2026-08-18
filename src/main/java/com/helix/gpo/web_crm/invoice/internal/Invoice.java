@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,22 @@ class Invoice extends BaseEntity {
     // Leitweg-ID o.ä. - v.a. für B2G-Rechnungen relevant, bei B2B optional
     @Column(name = "buyer_reference", length = 60)
     private String buyerReference;
+
+    @Column(name = "sent_to_email", length = 320)
+    private String sentToEmail;
+
+    @Column(name = "sent_at")
+    private Instant sentAt;
+
+    public void markSent(String sentToEmail) {
+        if (this.status != InvoiceStatus.ISSUED) {
+            throw new IllegalStateException(
+                    "Nur ausgestellte Rechnungen können versendet werden: " + getId());
+        }
+        this.sentToEmail = sentToEmail;
+        this.sentAt = java.time.Instant.now();
+        this.status = InvoiceStatus.SENT;
+    }
 
     // Unveränderlicher Schnappschuss zum Ausstellungszeitpunkt - GENAU deswegen
     // eigene Embeddables statt Live-Referenz auf tenant/CompanyBillingProperties

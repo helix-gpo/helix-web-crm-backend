@@ -68,6 +68,8 @@ final class InvoiceMapper {
                 invoice.taxTotal(),
                 invoice.grossTotal(),
                 invoice.getDocumentKey(),
+                invoice.getSentToEmail(),
+                invoice.getSentAt(),
                 invoice.getCreatedAt(),
                 invoice.getUpdatedAt()
         );

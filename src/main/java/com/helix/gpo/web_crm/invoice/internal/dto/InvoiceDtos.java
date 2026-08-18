@@ -5,6 +5,7 @@ import com.helix.gpo.web_crm.invoice.internal.LineItemSource;
 import com.helix.gpo.web_crm.shared.Address;
 import com.helix.gpo.web_crm.shared.Money;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -51,7 +52,9 @@ public final class InvoiceDtos {
     }
 
     public record IssueInvoiceRequest(
-            LocalDate issueDate
+            LocalDate issueDate,
+            Boolean sendEmailDirectly,
+            String invoiceEmail
     ) {
     }
 
@@ -89,6 +92,8 @@ public final class InvoiceDtos {
             Money taxTotal,
             Money grossTotal,
             String documentKey,
+            String sentToEmail,
+            Instant sentAt,
             Instant createdAt,
             Instant updatedAt
     ) {
@@ -110,6 +115,7 @@ public final class InvoiceDtos {
     public record InvoicePrefillResponse(
             BillingPartyDto suggestedSeller,
             BillingPartyDto suggestedBuyer,
+            String suggestedBuyerReference,
             List<MilestoneOptionDto> availableMilestones
     ) {
     }
@@ -126,6 +132,11 @@ public final class InvoiceDtos {
             String unitCode,
             @NotNull Money unitPrice,
             BigDecimal taxRatePercentage
+    ) {
+    }
+
+    public record SendInvoiceRequest(
+            @Email String email
     ) {
     }
 

@@ -2,6 +2,7 @@ package com.helix.gpo.web_crm.invoice.internal;
 
 import com.helix.gpo.web_crm.invoice.internal.config.CompanyBillingProperties;
 import com.helix.gpo.web_crm.invoice.internal.dto.InvoiceDtos.*;
+import com.helix.gpo.web_crm.notification.NotificationApi;
 import com.helix.gpo.web_crm.project.MilestoneSummary;
 import com.helix.gpo.web_crm.project.ProjectApi;
 import com.helix.gpo.web_crm.shared.Money;
@@ -30,8 +31,9 @@ class InvoiceService {
     private final InvoiceNumberGenerator invoiceNumberGenerator;
     private final TenantApi tenantApi;
     private final ProjectApi projectApi;
-    private final CompanyBillingProperties companyBillingProperties;
     private final StorageApi storageApi;
+    private final NotificationApi notificationApi;
+    private final CompanyBillingProperties companyBillingProperties;
     private final InvoicePdfService invoicePdfService;
 
     InvoiceResponse create(CreateInvoiceRequest request) {
@@ -78,6 +80,8 @@ class InvoiceService {
 
     InvoiceResponse issue(UUID invoiceId, IssueInvoiceRequest request) {
         Invoice invoice = getInvoiceOrThrow(invoiceId);
+        assertMilestonesNotLockedElsewhere(invoice);
+
         LocalDate issueDate = request != null && request.issueDate() != null ? request.issueDate() : LocalDate.now();
         String invoiceNumber = invoiceNumberGenerator.generateNext();
 
@@ -88,8 +92,55 @@ class InvoiceService {
         String documentKey = "invoices/" + invoice.getId() + "/" + invoiceNumber + ".pdf";
         storageApi.upload(documentKey, pdf, "application/pdf");
         invoice.attachDocument(documentKey);
+        invoiceRepository.save(invoice);
+
+        boolean sendDirectly = request != null && Boolean.TRUE.equals(request.sendEmailDirectly());
+        if (sendDirectly) {
+            String targetEmail = resolveTargetEmail(invoice, request.invoiceEmail());
+            sendInvoiceEmail(invoice, targetEmail, pdf, invoiceNumber);
+            invoice.markSent(targetEmail);
+        }
 
         return InvoiceMapper.toResponse(invoiceRepository.save(invoice));
+    }
+
+    InvoiceResponse send(UUID invoiceId, SendInvoiceRequest request) {
+        Invoice invoice = getInvoiceOrThrow(invoiceId);
+        String targetEmail = resolveTargetEmail(invoice, request != null ? request.email() : null);
+
+        byte[] pdf = invoicePdfService.render(invoice);
+        sendInvoiceEmail(invoice, targetEmail, pdf, invoice.getInvoiceNumber());
+        invoice.markSent(targetEmail);
+
+        return InvoiceMapper.toResponse(invoiceRepository.save(invoice));
+    }
+
+    private String resolveTargetEmail(Invoice invoice, String requestedEmail) {
+        if (requestedEmail != null && !requestedEmail.isBlank()) {
+            return requestedEmail;
+        }
+        if (invoice.getBuyer() != null && invoice.getBuyer().email() != null) {
+            return invoice.getBuyer().email();
+        }
+        throw new IllegalArgumentException(
+                "Keine Rechnungs-E-Mail-Adresse hinterlegt und keine angegeben.");
+    }
+
+    private void sendInvoiceEmail(Invoice invoice, String toEmail, byte[] pdfBytes, String invoiceNumber) {
+        String subject = "Rechnung " + invoiceNumber + " – " + companyBillingProperties.name();
+        String html = """
+            <p>Sehr geehrte Damen und Herren,</p>
+            <p>anbei erhalten Sie die Rechnung <strong>%s</strong> von %s.</p>
+            <p>Mit freundlichen Grüßen<br/>%s</p>
+            """.formatted(invoiceNumber, companyBillingProperties.name(), companyBillingProperties.name());
+
+        notificationApi.send(new com.helix.gpo.web_crm.notification.EmailMessage(
+                toEmail,
+                subject,
+                html,
+                List.of(new com.helix.gpo.web_crm.notification.EmailAttachment(
+                        invoiceNumber + ".pdf", pdfBytes, "application/pdf"))
+        ));
     }
 
     String getDocumentUrl(UUID invoiceId) {
@@ -134,6 +185,7 @@ class InvoiceService {
         return new InvoicePrefillResponse(
                 InvoiceMapper.toDto(InvoiceMapper.toSellerSnapshot(companyBillingProperties)),
                 InvoiceMapper.toDto(InvoiceMapper.toBuyerSnapshot(tenant)),
+                generateAutoReference(tenant),
                 milestones
         );
     }
@@ -144,10 +196,8 @@ class InvoiceService {
         List<UUID> milestoneIds = milestones.stream().map(MilestoneSummary::id).toList();
         List<InvoiceLineItem> lineItems = invoiceLineItemRepository.findAllByMilestoneIdIn(milestoneIds);
 
-        // Nur ISSUED (oder später) zählt als "wirklich abgerechnet" - DRAFT-Rechnungen
-        // sind noch nicht verbindlich, dürfen den Meilenstein also nicht dauerhaft sperren
         Set<UUID> invoicedMilestoneIds = lineItems.stream()
-                .filter(li -> li.getInvoice().getStatus() != InvoiceStatus.DRAFT)
+                .filter(li -> isLockingStatus(li.getInvoice().getStatus()))
                 .map(InvoiceLineItem::getMilestoneId)
                 .collect(Collectors.toSet());
 
@@ -164,10 +214,39 @@ class InvoiceService {
                         m.price(),
                         invoicedMilestoneIds.contains(m.id()),
                         draftMilestoneIds.contains(m.id()),
-                        m.status()
+                        m.status() != null ? m.status() : null
                 ))
                 .toList();
     }
+
+    private boolean isLockingStatus(InvoiceStatus status) {
+        return status == InvoiceStatus.ISSUED
+                || status == InvoiceStatus.SENT
+                || status == InvoiceStatus.PAID
+                || status == InvoiceStatus.OVERDUE;
+    }
+
+    private void assertMilestonesNotLockedElsewhere(Invoice invoice) {
+        List<UUID> milestoneIds = invoice.getLineItems().stream()
+                .map(InvoiceLineItem::getMilestoneId)
+                .filter(java.util.Objects::nonNull)
+                .toList();
+
+        if (milestoneIds.isEmpty()) {
+            return;
+        }
+
+        boolean lockedElsewhere = invoiceLineItemRepository.findAllByMilestoneIdIn(milestoneIds).stream()
+                .filter(li -> !li.getInvoice().getId().equals(invoice.getId()))
+                .anyMatch(li -> isLockingStatus(li.getInvoice().getStatus()));
+
+        if (lockedElsewhere) {
+            throw new IllegalStateException(
+                    "Diese Rechnung enthält Meilensteine, die bereits in einer anderen ausgestellten Rechnung abgerechnet werden. "
+                            + "Bitte entferne die betroffene Position, bevor du die Rechnung ausstellst.");
+        }
+    }
+
 
     private void appendLineItem(Invoice invoice, LineItemRequest request) {
         switch (request.source()) {
