@@ -60,3 +60,5 @@ helix:
     sender-name: ${NOTIFICATION_SENDER_NAME:Helix GPO}
     reply-to-email: ${NOTIFICATION_REPLY_TO_EMAIL:helix.gpo@gmail.com}
     region: eu-central-1
+  website:
+    base-url: ${WEBSITE_BASE_URL:http://localhost:4201}

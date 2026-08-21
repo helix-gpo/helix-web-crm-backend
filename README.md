@@ -9,18 +9,14 @@
 
 # now:
 - invoices
-  - issuing with possibility to directly send email via checkbox (new status - sent)
-  - modal point for sending mail (if status != sent)
-  - milestones in invoices → not able to send other invoice with milestone - not suggested in invoice creation
-  - ref automatically still wrong
-- testimonials
-  - send invitation link via email (status for project/partner)
-- toast for every error/success
+  - only send if data is complete (USt.-ID, data)
+- toast for every error/success (e.g. project when inactive tenant)
 - notification module for sending (email)
+  - email templates (invoices + testimonials etc.)
 - s3 for all resources
 - tenants + projects
   - additional information
-- mail designs
+  - milestone add button design (margin top)
 
 # future:
 - invoices:

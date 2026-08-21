@@ -31,6 +31,11 @@ class TestimonialController {
         return tenantId != null ? testimonialService.findAllByTenant(tenantId) : testimonialService.findAll();
     }
 
+    @GetMapping("/api/crm/testimonial-invitations")
+    List<InvitationSummaryResponse> findInvitationsByTenant(@RequestParam UUID tenantId) {
+        return testimonialService.findInvitationsByTenant(tenantId);
+    }
+
     @PostMapping("/api/crm/testimonials/{id}/approve")
     TestimonialResponse approve(@PathVariable UUID id) {
         return testimonialService.approve(id);

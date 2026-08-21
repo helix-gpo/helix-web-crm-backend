@@ -55,7 +55,8 @@ final class TenantMapper {
                 partner.getTenant().getCompanyName(),
                 partner.getFirstName(),
                 partner.getLastName(),
-                partner.getRole()
+                partner.getRole(),
+                partner.getEmail()
         );
     }
 

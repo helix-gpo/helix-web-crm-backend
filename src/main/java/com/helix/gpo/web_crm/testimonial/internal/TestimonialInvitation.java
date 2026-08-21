@@ -40,6 +40,17 @@ class TestimonialInvitation extends BaseEntity {
     @Column(name = "used_at")
     private Instant usedAt;
 
+    @Column(name = "sent_to_email", length = 254)
+    private String sentToEmail;
+
+    @Column(name = "sent_at")
+    private Instant sentAt;
+
+    public void markSent(String sentToEmail) {
+        this.sentToEmail = sentToEmail;
+        this.sentAt = Instant.now();
+    }
+
     public boolean isUsable() {
         return status == InvitationStatus.PENDING && Instant.now().isBefore(expiresAt);
     }

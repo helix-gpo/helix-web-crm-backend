@@ -8,6 +8,7 @@ public record PartnerSummary(
         String companyName,
         String firstName,
         String lastName,
-        String role
+        String role,
+        String email
 ) {
 }

@@ -1,5 +1,7 @@
 package com.helix.gpo.web_crm.testimonial.internal;
 
+import com.helix.gpo.web_crm.notification.NotificationApi;
+import com.helix.gpo.web_crm.testimonial.internal.config.WebsiteProperties;
 import com.helix.gpo.web_crm.testimonial.internal.dto.TestimonialDtos.*;
 import com.helix.gpo.web_crm.tenant.PartnerSummary;
 import com.helix.gpo.web_crm.tenant.TenantApi;
@@ -27,6 +29,8 @@ class TestimonialService {
     private final TestimonialRepository testimonialRepository;
     private final TokenGenerator tokenGenerator;
     private final TenantApi tenantApi;
+    private final NotificationApi notificationApi;
+    private final WebsiteProperties websiteProperties;
 
     InvitationResponse createInvitation(CreateInvitationRequest request) {
         PartnerSummary partner = tenantApi.findPartnerSummaryById(request.partnerId())
@@ -46,8 +50,44 @@ class TestimonialService {
 
         invitation = invitationRepository.save(invitation);
 
+        boolean sendEmail = Boolean.TRUE.equals(request.sendEmail());
+        String sentToEmail = null;
+        if (sendEmail) {
+            sentToEmail = request.email() != null && !request.email().isBlank()
+                    ? request.email()
+                    : partner.email();
+            if (sentToEmail == null || sentToEmail.isBlank()) {
+                throw new IllegalArgumentException(
+                        "Für diesen Ansprechpartner ist keine E-Mail-Adresse hinterlegt - bitte manuell angeben.");
+            }
+            sendInvitationEmail(partner, sentToEmail, rawToken);
+            invitation.markSent(sentToEmail);
+            invitationRepository.save(invitation);
+        }
+
         // rawToken existiert ab jetzt NUR noch in diesem Response - nirgends persistiert
-        return new InvitationResponse(invitation.getId(), rawToken, expiresAt);
+        return new InvitationResponse(invitation.getId(), rawToken, expiresAt, sendEmail, sentToEmail);
+    }
+
+    @Transactional(readOnly = true)
+    List<InvitationSummaryResponse> findInvitationsByTenant(UUID tenantId) {
+        return invitationRepository.findAllByTenantIdOrderByCreatedAtDesc(tenantId).stream()
+                .map(TestimonialMapper::toSummaryResponse)
+                .toList();
+    }
+
+    private void sendInvitationEmail(PartnerSummary partner, String toEmail, String rawToken) {
+        String link = websiteProperties.baseUrl() + "/feedback?token=" + rawToken;
+        String subject = "Wir würden uns über Ihre Referenz freuen – " + partner.companyName();
+        String html = """
+            <p>Hallo %s,</p>
+            <p>vielen Dank für die Zusammenarbeit! Wir würden uns sehr über eine kurze Referenz von Ihnen freuen.</p>
+            <p><a href="%s">Hier klicken, um eine Referenz abzugeben</a></p>
+            <p>Der Link ist einmalig gültig und läuft automatisch ab.</p>
+            <p>Viele Grüße<br/>Helix GPO</p>
+            """.formatted(partner.firstName(), link);
+
+        notificationApi.send(new com.helix.gpo.web_crm.notification.EmailMessage(toEmail, subject, html));
     }
 
     void revokeInvitation(UUID invitationId) {

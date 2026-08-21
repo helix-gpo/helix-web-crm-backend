@@ -1,5 +1,6 @@
 package com.helix.gpo.web_crm.testimonial.internal.dto;
 
+import com.helix.gpo.web_crm.testimonial.internal.InvitationStatus;
 import com.helix.gpo.web_crm.testimonial.internal.TestimonialStatus;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -17,7 +18,9 @@ public final class TestimonialDtos {
     public record CreateInvitationRequest(
             @NotNull UUID partnerId,
             UUID projectId,
-            Integer expiresInDays
+            Integer expiresInDays,
+            Boolean sendEmail,
+            String email
     ) {
     }
 
@@ -26,7 +29,22 @@ public final class TestimonialDtos {
     public record InvitationResponse(
             UUID invitationId,
             String rawToken,
-            Instant expiresAt
+            Instant expiresAt,
+            boolean sent,
+            String sentToEmail
+    ) {
+    }
+
+    public record InvitationSummaryResponse(
+            UUID id,
+            UUID partnerId,
+            UUID projectId,
+            InvitationStatus status,
+            String sentToEmail,
+            Instant sentAt,
+            Instant expiresAt,
+            Instant usedAt,
+            Instant createdAt
     ) {
     }
 

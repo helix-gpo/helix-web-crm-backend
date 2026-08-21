@@ -1,0 +1,9 @@
+package com.helix.gpo.web_crm.testimonial.internal.config;
+
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@EnableConfigurationProperties(WebsiteProperties.class)
+class TestimonialModuleConfig {
+}
