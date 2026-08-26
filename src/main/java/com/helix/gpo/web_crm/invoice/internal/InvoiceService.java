@@ -1,6 +1,7 @@
 package com.helix.gpo.web_crm.invoice.internal;
 
 import com.helix.gpo.web_crm.invoice.internal.config.CompanyBillingProperties;
+import com.helix.gpo.web_crm.invoice.internal.dto.InvoiceDtos;
 import com.helix.gpo.web_crm.invoice.internal.dto.InvoiceDtos.*;
 import com.helix.gpo.web_crm.notification.NotificationApi;
 import com.helix.gpo.web_crm.project.MilestoneSummary;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -80,6 +82,15 @@ class InvoiceService {
 
     InvoiceResponse issue(UUID invoiceId, IssueInvoiceRequest request) {
         Invoice invoice = getInvoiceOrThrow(invoiceId);
+
+        TenantBillingDetails tenant = tenantApi.findBillingDetailsById(invoice.getTenantId())
+                .orElseThrow(() -> new EntityNotFoundException("Tenant not found: " + invoice.getTenantId()));
+        invoice.freezeBillingSnapshots(
+                InvoiceMapper.toSellerSnapshot(companyBillingProperties),
+                InvoiceMapper.toBuyerSnapshot(tenant)
+        );
+
+        assertBillingDataComplete(invoice);
         assertMilestonesNotLockedElsewhere(invoice);
 
         LocalDate issueDate = request != null && request.issueDate() != null ? request.issueDate() : LocalDate.now();
@@ -153,7 +164,20 @@ class InvoiceService {
 
     @Transactional(readOnly = true)
     InvoiceResponse findById(UUID id) {
-        return InvoiceMapper.toResponse(getInvoiceOrThrow(id));
+        Invoice invoice = getInvoiceOrThrow(id);
+
+        if (invoice.getStatus() != InvoiceStatus.DRAFT) {
+            return InvoiceMapper.toResponse(invoice);
+        }
+
+        TenantBillingDetails tenant = tenantApi.findBillingDetailsById(invoice.getTenantId())
+                .orElseThrow(() -> new EntityNotFoundException("Tenant not found: " + invoice.getTenantId()));
+
+        return InvoiceMapper.toResponse(
+                invoice,
+                InvoiceMapper.toSellerSnapshot(companyBillingProperties),
+                InvoiceMapper.toBuyerSnapshot(tenant)
+        );
     }
 
     @Transactional(readOnly = true)
@@ -182,12 +206,29 @@ class InvoiceService {
                 ? List.of()
                 : buildMilestoneOptions(projectId);
 
+        InvoiceDtos.BillingPartyDto buyerDto = InvoiceMapper.toDto(InvoiceMapper.toBuyerSnapshot(tenant));
+        boolean buyerDataComplete = BillingDataValidator.missingFields(buyerDto, "Mandant", false).isEmpty();
+
         return new InvoicePrefillResponse(
                 InvoiceMapper.toDto(InvoiceMapper.toSellerSnapshot(companyBillingProperties)),
-                InvoiceMapper.toDto(InvoiceMapper.toBuyerSnapshot(tenant)),
+                buyerDto,
+                buyerDataComplete,
                 generateAutoReference(tenant),
                 milestones
         );
+    }
+
+    private void assertBillingDataComplete(Invoice invoice) {
+        List<String> missing = new ArrayList<>();
+        missing.addAll(BillingDataValidator.missingFields(
+                InvoiceMapper.toDto(invoice.getSeller()), "Aussteller (eigene Firmendaten)", true));
+        missing.addAll(BillingDataValidator.missingFields(
+                InvoiceMapper.toDto(invoice.getBuyer()), "Rechnungsempfänger (Mandant)", false));
+
+        if (!missing.isEmpty()) {
+            throw new IllegalStateException(
+                    "Rechnung kann nicht ausgestellt werden - fehlende Pflichtangaben: " + String.join("; ", missing));
+        }
     }
 
     private List<MilestoneOptionDto> buildMilestoneOptions(UUID projectId) {

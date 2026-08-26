@@ -38,7 +38,7 @@ helix:
   company:
     name: Helix GPO
     legal-name: Helix GPO UG (haftungsbeschränkt) & Co. KG
-    vat-id: ${HELIX_VAT_ID}
+    vat-id: ${HELIX_VAT_ID:DE1234567890}
     address:
       street: Erftstraße
       house-number: "50"
@@ -46,8 +46,8 @@ helix:
       city: Neuss
       country-code: DE
     email: helix.gpo@gmail.com
-    iban: ${HELIX_IBAN}
-    bic: ${HELIX_BIC}
+    iban: ${HELIX_IBAN:DE43300700240795085000}
+    bic: ${HELIX_BIC:DEUTDEDBDUE}
   security:
     public-ip-allowlist: ${PUBLIC_IP_ALLOWLIST}
     cognito:

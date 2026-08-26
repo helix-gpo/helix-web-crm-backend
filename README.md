@@ -8,8 +8,10 @@
 - n8n-ai
 
 # now:
-- invoices
-  - only send if data is complete (USt.-ID, data)
+- invoices + testimonials
+  - default: not check marked
+  - invoice status: payed
+  - invoices that we need to pay
 - toast for every error/success (e.g. project when inactive tenant)
 - notification module for sending (email)
   - email templates (invoices + testimonials etc.)
@@ -17,6 +19,10 @@
 - tenants + projects
   - additional information
   - milestone add button design (margin top)
+- filter everything (click on headline)
+- tenant
+  - partner on form directly
+  - partner feedback only if project is there
 
 # future:
 - invoices:

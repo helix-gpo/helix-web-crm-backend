@@ -71,6 +71,15 @@ class Invoice extends BaseEntity {
         this.status = InvoiceStatus.SENT;
     }
 
+    void freezeBillingSnapshots(BillingParty seller, BillingParty buyer) {
+        if (this.status != InvoiceStatus.DRAFT) {
+            throw new IllegalStateException(
+                    "Stammdaten-Snapshot kann nur bei Entwürfen aktualisiert werden: " + getId());
+        }
+        this.seller = seller;
+        this.buyer = buyer;
+    }
+
     // Unveränderlicher Schnappschuss zum Ausstellungszeitpunkt - GENAU deswegen
     // eigene Embeddables statt Live-Referenz auf tenant/CompanyBillingProperties
     @Embedded

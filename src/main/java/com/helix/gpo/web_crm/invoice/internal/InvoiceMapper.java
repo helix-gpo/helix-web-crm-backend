@@ -50,6 +50,10 @@ final class InvoiceMapper {
     }
 
     static InvoiceResponse toResponse(Invoice invoice) {
+        return toResponse(invoice, invoice.getSeller(), invoice.getBuyer());
+    }
+
+    static InvoiceResponse toResponse(Invoice invoice, BillingParty seller, BillingParty buyer) {
         return new InvoiceResponse(
                 invoice.getId(),
                 invoice.getInvoiceNumber(),
@@ -61,8 +65,8 @@ final class InvoiceMapper {
                 invoice.getDueDate(),
                 invoice.getPaymentTermsDays(),
                 invoice.getBuyerReference(),
-                toDto(invoice.getSeller()),
-                toDto(invoice.getBuyer()),
+                toDto(seller),
+                toDto(buyer),
                 invoice.getLineItems().stream().map(InvoiceMapper::toLineItemResponse).toList(),
                 invoice.netTotal(),
                 invoice.taxTotal(),

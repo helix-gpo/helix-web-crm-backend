@@ -115,6 +115,7 @@ public final class InvoiceDtos {
     public record InvoicePrefillResponse(
             BillingPartyDto suggestedSeller,
             BillingPartyDto suggestedBuyer,
+            boolean buyerDataComplete,
             String suggestedBuyerReference,
             List<MilestoneOptionDto> availableMilestones
     ) {
