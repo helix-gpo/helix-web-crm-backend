@@ -13,11 +13,12 @@ class NotificationTestController {
 
     private final NotificationApi notificationApi;
 
-    @PostMapping("/api/notifications/test")
+    @PostMapping("/api/public/notifications/test")
     void test(@RequestParam String to) {
         notificationApi.send(new EmailMessage(
                 to,
                 "Helix GPO CRM – Testmail",
+                "Test der neuen E-Mail-Vorlage",
                 "<p>Wenn du das liest, funktioniert der SES-Versand über die verifizierte Domain.</p>"
         ));
     }

@@ -1,6 +1,7 @@
 package com.helix.gpo.web_crm.notification.internal;
 
 import com.helix.gpo.web_crm.notification.EmailAttachment;
+import com.helix.gpo.web_crm.notification.EmailLayout;
 import com.helix.gpo.web_crm.notification.EmailMessage;
 import com.helix.gpo.web_crm.notification.NotificationApi;
 import com.helix.gpo.web_crm.notification.internal.config.NotificationProperties;
@@ -60,8 +61,10 @@ class EmailService implements NotificationApi {
 
         MimeMultipart multipart = new MimeMultipart("mixed");
 
+        String fullHtml = EmailLayout.wrap(properties.logoUrl(), message.preheader(), message.bodyHtml());
+
         MimeBodyPart htmlPart = new MimeBodyPart();
-        htmlPart.setContent(message.htmlBody(), "text/html; charset=UTF-8");
+        htmlPart.setContent(fullHtml, "text/html; charset=UTF-8");
         multipart.addBodyPart(htmlPart);
 
         for (EmailAttachment attachment : message.attachments()) {

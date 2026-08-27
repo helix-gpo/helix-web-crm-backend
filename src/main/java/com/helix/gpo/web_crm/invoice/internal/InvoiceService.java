@@ -3,6 +3,8 @@ package com.helix.gpo.web_crm.invoice.internal;
 import com.helix.gpo.web_crm.invoice.internal.config.CompanyBillingProperties;
 import com.helix.gpo.web_crm.invoice.internal.dto.InvoiceDtos;
 import com.helix.gpo.web_crm.invoice.internal.dto.InvoiceDtos.*;
+import com.helix.gpo.web_crm.notification.EmailAttachment;
+import com.helix.gpo.web_crm.notification.EmailMessage;
 import com.helix.gpo.web_crm.notification.NotificationApi;
 import com.helix.gpo.web_crm.project.MilestoneSummary;
 import com.helix.gpo.web_crm.project.ProjectApi;
@@ -146,18 +148,20 @@ class InvoiceService {
 
     private void sendInvoiceEmail(Invoice invoice, String toEmail, byte[] pdfBytes, String invoiceNumber) {
         String subject = "Rechnung " + invoiceNumber + " – " + companyBillingProperties.name();
-        String html = """
-            <p>Sehr geehrte Damen und Herren,</p>
-            <p>anbei erhalten Sie die Rechnung <strong>%s</strong> von %s.</p>
-            <p>Mit freundlichen Grüßen<br/>%s</p>
+        String preheader = "Ihre Rechnung " + invoiceNumber + " finden Sie im Anhang.";
+        String body = """
+            <p style="margin:0 0 16px;">Sehr geehrte Damen und Herren,</p>
+            <p style="margin:0 0 16px;">anbei erhalten Sie die Rechnung <strong>%s</strong> von %s.</p>
+            <p style="margin:0 0 16px;">Bitte begleichen Sie den Betrag innerhalb der angegebenen Zahlungsfrist. Bei Rückfragen antworten Sie gerne direkt auf diese E-Mail.</p>
+            <p style="margin:24px 0 0;">Mit freundlichen Grüßen<br/>%s</p>
             """.formatted(invoiceNumber, companyBillingProperties.name(), companyBillingProperties.name());
 
-        notificationApi.send(new com.helix.gpo.web_crm.notification.EmailMessage(
+        notificationApi.send(new EmailMessage(
                 toEmail,
                 subject,
-                html,
-                List.of(new com.helix.gpo.web_crm.notification.EmailAttachment(
-                        invoiceNumber + ".pdf", pdfBytes, "application/pdf"))
+                preheader,
+                body,
+                List.of(new EmailAttachment(invoiceNumber + ".pdf", pdfBytes, "application/pdf"))
         ));
     }
 

@@ -182,15 +182,16 @@ class TestimonialService {
     private void sendInvitationEmail(PartnerSummary partner, String toEmail, String rawToken) {
         String link = websiteProperties.baseUrl() + "/feedback?token=" + rawToken;
         String subject = "Wir würden uns über Ihre Referenz freuen – " + partner.companyName();
-        String html = """
-                <p>Hallo %s,</p>
-                <p>vielen Dank für die Zusammenarbeit! Wir würden uns sehr über eine kurze Referenz von Ihnen freuen.</p>
-                <p><a href="%s">Hier klicken, um eine Referenz abzugeben</a></p>
-                <p>Der Link ist einmalig gültig und läuft automatisch ab.</p>
-                <p>Viele Grüße<br/>Helix GPO</p>
-                """.formatted(partner.firstName(), link);
+        String preheader = "Teilen Sie in wenigen Minuten Ihre Erfahrung mit uns.";
+        String body = """
+            <p style="margin:0 0 16px;">Hallo %s,</p>
+            <p style="margin:0 0 16px;">vielen Dank für die Zusammenarbeit! Wir würden uns sehr über eine kurze Referenz von Ihnen freuen – es dauert nur wenige Minuten.</p>
+            %s
+            <p style="margin:24px 0 0; font-size:13px; color:#8a93a6;">Der Link ist einmalig gültig und läuft automatisch ab.</p>
+            <p style="margin:16px 0 0;">Viele Grüße<br/>Helix GPO</p>
+            """.formatted(partner.firstName(), com.helix.gpo.web_crm.notification.EmailLayout.button("Referenz abgeben", link));
 
-        notificationApi.send(new EmailMessage(toEmail, subject, html));
+        notificationApi.send(new EmailMessage(toEmail, subject, preheader, body));
     }
 
     void revokeInvitation(UUID invitationId) {

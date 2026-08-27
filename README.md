@@ -9,18 +9,12 @@
 - error messages from backend (locales) - general messages?
 
 # now:
-- invoices + testimonials
-  - default: not check marked
-  - invoice status: payed
-  - invoices that we need to pay
 - notification module for sending (email)
-  - email templates (invoices + testimonials etc.)
-- filter everything (click on headline)
-- tenant
-  - partner on form directly
-  - partner feedback only if project is there
+  - improve email templates + signature
+  - button on testimonial email
 
 # future:
 - invoices:
   - .xml file for e-invoice sent as well
+  - invoices we need to pay (inbox)
 - employee-module
