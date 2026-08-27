@@ -1,14 +1,13 @@
 # todos:
-- cron jobs + validation
-- clean code (annotations - no constructors etc. + sort methods)
-- dialogs (hover/active colors - colors in general)
-- optimize date picker
+- cron jobs
 - before deployment: env table (with bank details etc.!)
 - refresh-token duration
 - n8n-ai
-- error messages from backend (locales) - general messages?
 
 # now:
+- validation
+- clean code (annotations - no constructors etc. + sort methods)
+- - dialogs (hover/active colors - colors in general)
 - notification module for sending (email)
   - improve email templates + signature
   - button on testimonial email
