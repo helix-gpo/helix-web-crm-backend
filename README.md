@@ -6,8 +6,10 @@
 
 # now:
 - validation
-- clean code (annotations - no constructors etc. + sort methods)
-- - dialogs (hover/active colors - colors in general)
+- code:
+  - clean code (annotations - no constructors etc. + sort methods)
+  - comments (all en not ger)
+- dialogs (hover/active colors - colors in general)
 - notification module for sending (email)
   - improve email templates + signature
   - button on testimonial email

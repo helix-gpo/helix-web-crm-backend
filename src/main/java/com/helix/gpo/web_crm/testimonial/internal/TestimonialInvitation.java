@@ -66,4 +66,10 @@ class TestimonialInvitation extends BaseEntity {
         }
     }
 
+    public void expire() {
+        if (this.status == InvitationStatus.PENDING) {
+            this.status = InvitationStatus.EXPIRED;
+        }
+    }
+
 }

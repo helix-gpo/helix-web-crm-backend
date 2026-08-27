@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 @Getter
 @Setter
@@ -172,10 +173,18 @@ class Invoice extends BaseEntity {
         return sumOf(InvoiceLineItem::grossAmount);
     }
 
-    private Money sumOf(java.util.function.Function<InvoiceLineItem, Money> extractor) {
+    private Money sumOf(Function<InvoiceLineItem, Money> extractor) {
         return lineItems.stream()
                 .map(extractor)
                 .reduce(new Money(java.math.BigDecimal.ZERO, currencyCode), Money::add);
+    }
+
+    public void markOverdue() {
+        if (this.status != InvoiceStatus.ISSUED && this.status != InvoiceStatus.SENT) {
+            throw new IllegalStateException(
+                    "Nur ausgestellte oder versendete Rechnungen können als überfällig markiert werden.");
+        }
+        this.status = InvoiceStatus.OVERDUE;
     }
 
     @Column(name = "document_key", length = 200)
