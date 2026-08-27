@@ -37,7 +37,7 @@ public record Money(
 
     private void requireSameCurrency(Money other) {
         if (!this.currencyCode.equals(other.currencyCode)) {
-            throw new IllegalArgumentException("Currency mismatch: " + this.currencyCode + " vs " + other.currencyCode);
+            throw new IllegalArgumentException("Unterschiedliche Währungen können nicht verrechnet werden: " + this.currencyCode + " / " + other.currencyCode);
         }
     }
 

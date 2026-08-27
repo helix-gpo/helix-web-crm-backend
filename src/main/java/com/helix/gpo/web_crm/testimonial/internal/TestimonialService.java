@@ -36,7 +36,7 @@ class TestimonialService {
 
     InvitationResponse createInvitation(CreateInvitationRequest request) {
         PartnerSummary partner = tenantApi.findPartnerSummaryById(request.partnerId())
-                .orElseThrow(() -> new EntityNotFoundException("Partner not found: " + request.partnerId()));
+                .orElseThrow(() -> new EntityNotFoundException("Dieser Ansprechpartner wurde nicht gefunden."));
 
         String rawToken = tokenGenerator.generateRawToken();
         int expiryDays = request.expiresInDays() != null ? request.expiresInDays() : DEFAULT_EXPIRY_DAYS;
@@ -85,11 +85,11 @@ class TestimonialService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid or unknown token"));
 
         if (!invitation.isUsable()) {
-            throw new IllegalStateException("Token is expired, already used, or revoked");
+            throw new IllegalStateException("Dieser Einladungslink ist abgelaufen, bereits verwendet oder wurde widerrufen.");
         }
 
         PartnerSummary partner = tenantApi.findPartnerSummaryById(invitation.getPartnerId())
-                .orElseThrow(() -> new EntityNotFoundException("Partner not found: " + invitation.getPartnerId()));
+                .orElseThrow(() -> new EntityNotFoundException("Dieser Ansprechpartner wurde nicht gefunden."));
 
         Testimonial testimonial = Testimonial.builder()
                 .invitationId(invitation.getId())
@@ -166,7 +166,7 @@ class TestimonialService {
 
     private Testimonial getOrThrow(UUID id) {
         return testimonialRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Testimonial not found: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Diese Referenz wurde nicht gefunden."));
     }
 
     // Partner kann zwischenzeitlich gelöscht worden sein - dann einfach kein
@@ -196,7 +196,7 @@ class TestimonialService {
 
     void revokeInvitation(UUID invitationId) {
         TestimonialInvitation invitation = invitationRepository.findById(invitationId)
-                .orElseThrow(() -> new EntityNotFoundException("Invitation not found: " + invitationId));
+                .orElseThrow(() -> new EntityNotFoundException("Diese Einladung wurde nicht gefunden."));
         invitation.revoke();
     }
 

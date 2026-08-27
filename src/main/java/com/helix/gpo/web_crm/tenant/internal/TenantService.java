@@ -177,12 +177,12 @@ class TenantService {
 
     private Tenant getTenantOrThrow(UUID id) {
         return tenantRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Tenant not found: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Dieser Mandant wurde nicht gefunden."));
     }
 
     private Partner getPartnerOrThrow(UUID partnerId) {
         return partnerRepository.findById(partnerId)
-                .orElseThrow(() -> new EntityNotFoundException("Partner not found: " + partnerId));
+                .orElseThrow(() -> new EntityNotFoundException("Dieser Ansprechpartner wurde nicht gefunden."));
     }
 
     private TenantResponse toResponse(Tenant tenant) {

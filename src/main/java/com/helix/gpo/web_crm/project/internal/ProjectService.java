@@ -156,7 +156,7 @@ class ProjectService {
 
     private Project getProjectOrThrow(UUID id) {
         return projectRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Project not found: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Dieses Projekt wurde nicht gefunden."));
     }
 
     MilestoneResponse updateMilestone(UUID milestoneId, UpdateMilestoneRequest request) {
@@ -173,14 +173,14 @@ class ProjectService {
 
     void removeMilestone(UUID milestoneId) {
         if (!milestoneRepository.existsById(milestoneId)) {
-            throw new EntityNotFoundException("Milestone not found: " + milestoneId);
+            throw new EntityNotFoundException("Dieser Meilenstein wurde nicht gefunden.");
         }
         milestoneRepository.deleteById(milestoneId);
     }
 
     private Milestone getMilestoneOrThrow(UUID id) {
         return milestoneRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Milestone not found: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Dieser Meilenstein wurde nicht gefunden."));
     }
 
     private ProjectResponse toResponse(Project project) {

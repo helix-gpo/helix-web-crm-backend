@@ -42,7 +42,7 @@ class InvoiceService {
 
     InvoiceResponse create(CreateInvoiceRequest request) {
         TenantBillingDetails tenant = tenantApi.findBillingDetailsById(request.tenantId())
-                .orElseThrow(() -> new EntityNotFoundException("Tenant not found: " + request.tenantId()));
+                .orElseThrow(() -> new EntityNotFoundException("Dieser Mandant wurde nicht gefunden."));
 
         String buyerReference = request.buyerReference() != null && !request.buyerReference().isBlank()
                 ? request.buyerReference()
@@ -86,7 +86,7 @@ class InvoiceService {
         Invoice invoice = getInvoiceOrThrow(invoiceId);
 
         TenantBillingDetails tenant = tenantApi.findBillingDetailsById(invoice.getTenantId())
-                .orElseThrow(() -> new EntityNotFoundException("Tenant not found: " + invoice.getTenantId()));
+                .orElseThrow(() -> new EntityNotFoundException("Dieser Mandant wurde nicht gefunden."));
         invoice.freezeBillingSnapshots(
                 InvoiceMapper.toSellerSnapshot(companyBillingProperties),
                 InvoiceMapper.toBuyerSnapshot(tenant)
@@ -182,7 +182,7 @@ class InvoiceService {
         }
 
         TenantBillingDetails tenant = tenantApi.findBillingDetailsById(invoice.getTenantId())
-                .orElseThrow(() -> new EntityNotFoundException("Tenant not found: " + invoice.getTenantId()));
+                .orElseThrow(() -> new EntityNotFoundException("Dieser Mandant wurde nicht gefunden."));
 
         return InvoiceMapper.toResponse(
                 invoice,
@@ -211,7 +211,7 @@ class InvoiceService {
     @Transactional(readOnly = true)
     InvoicePrefillResponse prefill(UUID tenantId, UUID projectId) {
         TenantBillingDetails tenant = tenantApi.findBillingDetailsById(tenantId)
-                .orElseThrow(() -> new EntityNotFoundException("Tenant not found: " + tenantId));
+                .orElseThrow(() -> new EntityNotFoundException("Dieser Mandant wurde nicht gefunden."));
 
         List<MilestoneOptionDto> milestones = projectId == null
                 ? List.of()
@@ -304,10 +304,10 @@ class InvoiceService {
         switch (request.source()) {
             case MILESTONE -> {
                 if (request.milestoneId() == null) {
-                    throw new IllegalArgumentException("milestoneId is required for MILESTONE line items");
+                    throw new IllegalArgumentException("Für Meilenstein-Positionen ist eine Meilenstein-Auswahl erforderlich.");
                 }
                 MilestoneSummary milestone = projectApi.findMilestoneSummaryById(request.milestoneId())
-                        .orElseThrow(() -> new EntityNotFoundException("Milestone not found: " + request.milestoneId()));
+                        .orElseThrow(() -> new EntityNotFoundException("Dieser Meilenstein wurde nicht gefunden."));
 
                 Money unitPrice = request.unitPrice() != null ? request.unitPrice() : milestone.price();
                 if (unitPrice == null) {
@@ -327,7 +327,7 @@ class InvoiceService {
             }
             case CUSTOM -> {
                 if (request.description() == null || request.unitPrice() == null) {
-                    throw new IllegalArgumentException("description and unitPrice are required for CUSTOM line items");
+                    throw new IllegalArgumentException("Für freie Positionen sind Beschreibung und Einzelpreis erforderlich.");
                 }
                 invoice.addLineItem(
                         LineItemSource.CUSTOM,
@@ -349,7 +349,7 @@ class InvoiceService {
 
     private Invoice getInvoiceOrThrow(UUID id) {
         return invoiceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Invoice not found: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Diese Rechnung wurde nicht gefunden."));
     }
 
     InvoiceResponse updateHeader(UUID invoiceId, UpdateInvoiceHeaderRequest request) {
@@ -374,7 +374,7 @@ class InvoiceService {
     void delete(UUID invoiceId) {
         Invoice invoice = getInvoiceOrThrow(invoiceId);
         if (invoice.getStatus() != InvoiceStatus.DRAFT) {
-            throw new IllegalStateException("Cannot delete a non-draft invoice: " + invoiceId);
+            throw new IllegalStateException("Nur Entwürfe können gelöscht werden.");
         }
         invoiceRepository.delete(invoice);
     }

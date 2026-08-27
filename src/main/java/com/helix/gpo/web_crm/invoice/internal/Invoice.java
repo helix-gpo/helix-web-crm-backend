@@ -187,7 +187,7 @@ class Invoice extends BaseEntity {
 
     public void issue(String invoiceNumber, LocalDate issueDate) {
         if (this.lineItems.isEmpty()) {
-            throw new IllegalStateException("Cannot issue an invoice without line items: " + getId());
+            throw new IllegalStateException("Eine Rechnung ohne Positionen kann nicht ausgestellt werden.");
         }
         this.invoiceNumber = invoiceNumber;
         this.issueDate = issueDate;
@@ -197,7 +197,7 @@ class Invoice extends BaseEntity {
 
     private void requireDraft() {
         if (this.status != InvoiceStatus.DRAFT) {
-            throw new IllegalStateException("Cannot modify line items on a non-draft invoice: " + getId());
+            throw new IllegalStateException("Positionen können nur bei Entwürfen geändert werden.");
         }
     }
     public void updateLineItem(UUID lineItemId, String description, BigDecimal quantity,
@@ -207,10 +207,10 @@ class Invoice extends BaseEntity {
         InvoiceLineItem item = this.lineItems.stream()
                 .filter(li -> li.getId().equals(lineItemId))
                 .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException("Line item not found: " + lineItemId));
+                .orElseThrow(() -> new EntityNotFoundException("Diese Rechnungsposition wurde nicht gefunden."));
 
         if (description == null || unitPrice == null) {
-            throw new IllegalArgumentException("description and unitPrice are required");
+            throw new IllegalArgumentException("Beschreibung und Einzelpreis sind erforderlich.");
         }
 
         item.setDescription(description);
