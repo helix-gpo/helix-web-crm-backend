@@ -65,6 +65,8 @@ public final class ProjectDtos {
             LocalDate startDate,
             LocalDate endDate,
             boolean visibleOnWebsite,
+            String imageUrl,
+            String notes,
             List<MilestoneResponse> milestones,
             Instant createdAt,
             Instant updatedAt
@@ -79,6 +81,11 @@ public final class ProjectDtos {
             List<ProjectTagDto> tags,
             LocalDate startDate,
             LocalDate endDate
+    ) {
+    }
+
+    public record UpdateProjectNotesRequest(
+            String notes
     ) {
     }
 

@@ -10,7 +10,7 @@ final class TenantMapper {
     private TenantMapper() {
     }
 
-    static TenantDtos.TenantResponse toResponse(Tenant tenant) {
+    static TenantDtos.TenantResponse toResponse(Tenant tenant, String logoUrl) {
         return new TenantDtos.TenantResponse(
                 tenant.getId(),
                 tenant.getCompanyName(),
@@ -20,8 +20,11 @@ final class TenantMapper {
                 tenant.getAddress(),
                 tenant.getContactEmail(),
                 tenant.getContactPhone(),
+                tenant.getWebsiteUrl(),
+                tenant.getNotes(),
                 tenant.getStatus(),
                 tenant.isVisibleOnWebsite(),
+                logoUrl,
                 tenant.getCreatedAt(),
                 tenant.getUpdatedAt()
         );
@@ -48,7 +51,19 @@ final class TenantMapper {
         );
     }
 
-    static PartnerSummary toPartnerSummary(Partner partner) {
+    static TenantDtos.PartnerResponse toPartnerResponse(Partner partner, String photoUrl) {
+        return new TenantDtos.PartnerResponse(
+                partner.getId(),
+                partner.getFirstName(),
+                partner.getLastName(),
+                partner.getRole(),
+                partner.getEmail(),
+                partner.getPhone(),
+                photoUrl
+        );
+    }
+
+    static PartnerSummary toPartnerSummary(Partner partner, String photoUrl) {
         return new PartnerSummary(
                 partner.getId(),
                 partner.tenantId(),
@@ -56,18 +71,8 @@ final class TenantMapper {
                 partner.getFirstName(),
                 partner.getLastName(),
                 partner.getRole(),
-                partner.getEmail()
-        );
-    }
-
-    static TenantDtos.PartnerResponse toPartnerResponse(Partner partner) {
-        return new TenantDtos.PartnerResponse(
-                partner.getId(),
-                partner.getFirstName(),
-                partner.getLastName(),
-                partner.getRole(),
                 partner.getEmail(),
-                partner.getPhone()
+                photoUrl
         );
     }
 

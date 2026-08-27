@@ -1,12 +1,17 @@
 package com.helix.gpo.web_crm.project.internal;
 
 import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos.*;
+import com.helix.gpo.web_crm.shared.ImageUploadValidator;
+import com.helix.gpo.web_crm.storage.StorageApi;
 import com.helix.gpo.web_crm.tenant.TenantApi;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +25,7 @@ class ProjectService {
     private final ProjectRepository projectRepository;
     private final MilestoneRepository milestoneRepository;
     private final TenantApi tenantApi;
+    private final StorageApi storageApi;
 
     ProjectResponse create(CreateProjectRequest request) {
         if (!tenantApi.existsAndIsActive(request.tenantId())) {
@@ -40,32 +46,32 @@ class ProjectService {
                 .endDate(request.endDate())
                 .build();
 
-        return ProjectMapper.toResponse(projectRepository.save(project));
+        return toResponse(projectRepository.save(project));
     }
 
     @Transactional(readOnly = true)
     ProjectResponse findById(UUID id) {
-        return ProjectMapper.toResponse(getProjectOrThrow(id));
+        return toResponse(getProjectOrThrow(id));
     }
 
     @Transactional(readOnly = true)
     List<ProjectResponse> findAll() {
         return projectRepository.findAll().stream()
-                .map(ProjectMapper::toResponse)
+                .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     List<ProjectResponse> findAllByTenant(UUID tenantId) {
         return projectRepository.findAllByTenantId(tenantId).stream()
-                .map(ProjectMapper::toResponse)
+                .map(this::toResponse)
                 .toList();
     }
 
     ProjectResponse changeStatus(UUID id, ChangeStatusRequest request) {
         Project project = getProjectOrThrow(id);
         project.changeStatus(request.status());
-        return ProjectMapper.toResponse(project);
+        return toResponse(project);
     }
 
     ProjectResponse publishOnWebsite(UUID id) {
@@ -77,13 +83,13 @@ class ProjectService {
         }
 
         project.publishOnWebsite();
-        return ProjectMapper.toResponse(project);
+        return toResponse(project);
     }
 
     ProjectResponse unpublishFromWebsite(UUID id) {
         Project project = getProjectOrThrow(id);
         project.unpublishFromWebsite();
-        return ProjectMapper.toResponse(project);
+        return toResponse(project);
     }
 
     ProjectResponse update(UUID id, UpdateProjectRequest request) {
@@ -99,7 +105,41 @@ class ProjectService {
                 request.startDate(),
                 request.endDate()
         );
-        return ProjectMapper.toResponse(project);
+        return toResponse(project);
+    }
+
+    ProjectResponse uploadImage(UUID projectId, MultipartFile file) {
+        Project project = getProjectOrThrow(projectId);
+        ImageUploadValidator.validate(file);
+
+        if (project.getImageKey() != null) {
+            storageApi.delete(project.getImageKey());
+        }
+
+        String key = ImageUploadValidator.generateKey("project-images", projectId, file);
+        try {
+            storageApi.upload(key, file.getBytes(), file.getContentType());
+        } catch (IOException e) {
+            throw new IllegalStateException("Bild konnte nicht hochgeladen werden.", e);
+        }
+
+        project.attachImage(key);
+        return toResponse(project);
+    }
+
+    ProjectResponse removeImage(UUID projectId) {
+        Project project = getProjectOrThrow(projectId);
+        if (project.getImageKey() != null) {
+            storageApi.delete(project.getImageKey());
+            project.removeImage();
+        }
+        return toResponse(project);
+    }
+
+    ProjectResponse updateNotes(UUID id, UpdateProjectNotesRequest request) {
+        Project project = getProjectOrThrow(id);
+        project.updateNotes(request.notes());
+        return toResponse(project);
     }
 
     MilestoneResponse addMilestone(UUID projectId, AddMilestoneRequest request) {
@@ -141,6 +181,13 @@ class ProjectService {
     private Milestone getMilestoneOrThrow(UUID id) {
         return milestoneRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Milestone not found: " + id));
+    }
+
+    private ProjectResponse toResponse(Project project) {
+        String imageUrl = project.getImageKey() != null
+                ? storageApi.presignedUrl(project.getImageKey(), Duration.ofMinutes(30))
+                : null;
+        return ProjectMapper.toResponse(project, imageUrl);
     }
 
 }

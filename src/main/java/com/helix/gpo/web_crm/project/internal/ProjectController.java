@@ -4,8 +4,10 @@ import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.util.List;
@@ -76,6 +78,21 @@ class ProjectController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void removeMilestone(@PathVariable UUID projectId, @PathVariable UUID milestoneId) {
         projectService.removeMilestone(milestoneId);
+    }
+
+    @PostMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ProjectResponse uploadImage(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
+        return projectService.uploadImage(id, file);
+    }
+
+    @DeleteMapping("/{id}/image")
+    ProjectResponse removeImage(@PathVariable UUID id) {
+        return projectService.removeImage(id);
+    }
+
+    @PatchMapping("/{id}/notes")
+    ProjectResponse updateNotes(@PathVariable UUID id, @RequestBody UpdateProjectNotesRequest request) {
+        return projectService.updateNotes(id, request);
     }
 
 }

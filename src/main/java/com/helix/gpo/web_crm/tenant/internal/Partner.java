@@ -35,6 +35,17 @@ class Partner extends BaseEntity {
     @Column(length = 30)
     private String phone;
 
+    @Column(name = "photo_key", length = 500)
+    private String photoKey;
+
+    public void attachPhoto(String key) {
+        this.photoKey = key;
+    }
+
+    public void removePhoto() {
+        this.photoKey = null;
+    }
+
     public UUID tenantId() {
         return tenant.getId();
     }

@@ -9,7 +9,7 @@ final class TestimonialMapper {
     private TestimonialMapper() {
     }
 
-    static TestimonialResponse toResponse(Testimonial testimonial) {
+    static TestimonialResponse toResponse(Testimonial testimonial, String partnerPhotoUrl) {
         return new TestimonialResponse(
                 testimonial.getId(),
                 testimonial.getTenantId(),
@@ -22,6 +22,7 @@ final class TestimonialMapper {
                 testimonial.getRating(),
                 testimonial.getStatus(),
                 testimonial.isVisibleOnWebsite(),
+                partnerPhotoUrl,
                 testimonial.getCreatedAt()
         );
     }

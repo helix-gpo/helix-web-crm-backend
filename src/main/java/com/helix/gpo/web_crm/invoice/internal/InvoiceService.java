@@ -126,6 +126,13 @@ class InvoiceService {
         return InvoiceMapper.toResponse(invoiceRepository.save(invoice));
     }
 
+    InvoiceResponse markPaid(UUID invoiceId, MarkPaidRequest request) {
+        Invoice invoice = getInvoiceOrThrow(invoiceId);
+        LocalDate paidDate = request != null && request.paidDate() != null ? request.paidDate() : LocalDate.now();
+        invoice.markPaid(paidDate);
+        return InvoiceMapper.toResponse(invoiceRepository.save(invoice));
+    }
+
     private String resolveTargetEmail(Invoice invoice, String requestedEmail) {
         if (requestedEmail != null && !requestedEmail.isBlank()) {
             return requestedEmail;

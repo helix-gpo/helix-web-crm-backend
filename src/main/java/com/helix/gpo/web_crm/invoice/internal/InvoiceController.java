@@ -84,4 +84,9 @@ class InvoiceController {
         return invoiceService.send(id, request);
     }
 
+    @PostMapping("/{id}/mark-paid")
+    InvoiceResponse markPaid(@PathVariable UUID id, @RequestBody(required = false) MarkPaidRequest request) {
+        return invoiceService.markPaid(id, request);
+    }
+
 }

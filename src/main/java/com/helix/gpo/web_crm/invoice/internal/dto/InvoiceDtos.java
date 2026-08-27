@@ -94,8 +94,14 @@ public final class InvoiceDtos {
             String documentKey,
             String sentToEmail,
             Instant sentAt,
+            LocalDate paidDate,
             Instant createdAt,
             Instant updatedAt
+    ) {
+    }
+
+    public record MarkPaidRequest(
+            LocalDate paidDate
     ) {
     }
 

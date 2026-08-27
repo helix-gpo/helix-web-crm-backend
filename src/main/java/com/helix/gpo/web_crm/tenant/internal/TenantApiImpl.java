@@ -1,5 +1,6 @@
 package com.helix.gpo.web_crm.tenant.internal;
 
+import com.helix.gpo.web_crm.storage.StorageApi;
 import com.helix.gpo.web_crm.tenant.PartnerSummary;
 import com.helix.gpo.web_crm.tenant.TenantApi;
 import com.helix.gpo.web_crm.tenant.TenantBillingDetails;
@@ -7,6 +8,7 @@ import com.helix.gpo.web_crm.tenant.TenantSummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,6 +18,7 @@ class TenantApiImpl implements TenantApi {
 
     private final TenantRepository tenantRepository;
     private final PartnerRepository partnerRepository;
+    private final StorageApi storageApi;
 
     @Override
     public Optional<TenantSummary> findSummaryById(UUID tenantId) {
@@ -36,7 +39,12 @@ class TenantApiImpl implements TenantApi {
 
     @Override
     public Optional<PartnerSummary> findPartnerSummaryById(UUID partnerId) {
-        return partnerRepository.findById(partnerId).map(TenantMapper::toPartnerSummary);
+        return partnerRepository.findById(partnerId).map(partner -> {
+            String photoUrl = partner.getPhotoKey() != null
+                    ? storageApi.presignedUrl(partner.getPhotoKey(), Duration.ofMinutes(30))
+                    : null;
+            return TenantMapper.toPartnerSummary(partner, photoUrl);
+        });
     }
 
 }

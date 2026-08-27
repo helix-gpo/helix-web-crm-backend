@@ -61,6 +61,12 @@ class Project extends BaseEntity {
     @Builder.Default
     private boolean visibleOnWebsite = false;
 
+    @Column(name = "image_key", length = 500)
+    private String imageKey;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
+
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("dueDate ASC")
     @Builder.Default
@@ -101,6 +107,18 @@ class Project extends BaseEntity {
                 .build();
         this.milestones.add(milestone);
         return milestone;
+    }
+
+    public void updateNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public void attachImage(String key) {
+        this.imageKey = key;
+    }
+
+    public void removeImage() {
+        this.imageKey = null;
     }
 
 }

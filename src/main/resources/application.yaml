@@ -3,6 +3,10 @@ spring:
     name: helix-crm
   profiles:
     active: ${ACTIVE_SPRING_PROFILE:dev}
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
   security:
     oauth2:
       resourceserver:

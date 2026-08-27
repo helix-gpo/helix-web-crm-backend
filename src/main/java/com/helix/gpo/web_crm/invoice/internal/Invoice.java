@@ -61,6 +61,9 @@ class Invoice extends BaseEntity {
     @Column(name = "sent_at")
     private Instant sentAt;
 
+    @Column(name = "paid_date")
+    private LocalDate paidDate;
+
     public void markSent(String sentToEmail) {
         if (this.status != InvoiceStatus.ISSUED) {
             throw new IllegalStateException(
@@ -69,6 +72,17 @@ class Invoice extends BaseEntity {
         this.sentToEmail = sentToEmail;
         this.sentAt = java.time.Instant.now();
         this.status = InvoiceStatus.SENT;
+    }
+
+    public void markPaid(LocalDate paidDate) {
+        if (this.status != InvoiceStatus.ISSUED
+                && this.status != InvoiceStatus.SENT
+                && this.status != InvoiceStatus.OVERDUE) {
+            throw new IllegalStateException(
+                    "Nur ausgestellte, versendete oder überfällige Rechnungen können als bezahlt markiert werden: " + getId());
+        }
+        this.paidDate = paidDate;
+        this.status = InvoiceStatus.PAID;
     }
 
     void freezeBillingSnapshots(BillingParty seller, BillingParty buyer) {

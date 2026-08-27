@@ -1,5 +1,6 @@
 package com.helix.gpo.web_crm.testimonial.internal;
 
+import com.helix.gpo.web_crm.notification.EmailMessage;
 import com.helix.gpo.web_crm.notification.NotificationApi;
 import com.helix.gpo.web_crm.testimonial.internal.config.WebsiteProperties;
 import com.helix.gpo.web_crm.testimonial.internal.dto.TestimonialDtos.*;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -38,7 +40,7 @@ class TestimonialService {
 
         String rawToken = tokenGenerator.generateRawToken();
         int expiryDays = request.expiresInDays() != null ? request.expiresInDays() : DEFAULT_EXPIRY_DAYS;
-        Instant expiresAt = Instant.now().plus(java.time.Duration.ofDays(expiryDays));
+        Instant expiresAt = Instant.now().plus(Duration.ofDays(expiryDays));
 
         TestimonialInvitation invitation = TestimonialInvitation.builder()
                 .tenantId(partner.tenantId())
@@ -76,27 +78,6 @@ class TestimonialService {
                 .toList();
     }
 
-    private void sendInvitationEmail(PartnerSummary partner, String toEmail, String rawToken) {
-        String link = websiteProperties.baseUrl() + "/feedback?token=" + rawToken;
-        String subject = "Wir würden uns über Ihre Referenz freuen – " + partner.companyName();
-        String html = """
-            <p>Hallo %s,</p>
-            <p>vielen Dank für die Zusammenarbeit! Wir würden uns sehr über eine kurze Referenz von Ihnen freuen.</p>
-            <p><a href="%s">Hier klicken, um eine Referenz abzugeben</a></p>
-            <p>Der Link ist einmalig gültig und läuft automatisch ab.</p>
-            <p>Viele Grüße<br/>Helix GPO</p>
-            """.formatted(partner.firstName(), link);
-
-        notificationApi.send(new com.helix.gpo.web_crm.notification.EmailMessage(toEmail, subject, html));
-    }
-
-    void revokeInvitation(UUID invitationId) {
-        TestimonialInvitation invitation = invitationRepository.findById(invitationId)
-                .orElseThrow(() -> new EntityNotFoundException("Invitation not found: " + invitationId));
-        invitation.revoke();
-    }
-
-    // Öffentlicher Einreiche-Vorgang - einzige Legitimation ist der gültige Token
     TestimonialResponse submit(SubmitTestimonialRequest request) {
         String tokenHash = tokenGenerator.hash(request.token());
 
@@ -124,19 +105,19 @@ class TestimonialService {
 
         invitation.markUsed();
 
-        return TestimonialMapper.toResponse(testimonialRepository.save(testimonial));
+        return toResponse(testimonialRepository.save(testimonial));
     }
 
     TestimonialResponse approve(UUID id) {
         Testimonial testimonial = getOrThrow(id);
         testimonial.approve();
-        return TestimonialMapper.toResponse(testimonial);
+        return toResponse(testimonial);
     }
 
     TestimonialResponse reject(UUID id) {
         Testimonial testimonial = getOrThrow(id);
         testimonial.reject();
-        return TestimonialMapper.toResponse(testimonial);
+        return toResponse(testimonial);
     }
 
     TestimonialResponse publish(UUID id) {
@@ -153,39 +134,69 @@ class TestimonialService {
         }
 
         testimonial.publish();
-        return TestimonialMapper.toResponse(testimonial);
+        return toResponse(testimonial);
     }
 
     TestimonialResponse unpublish(UUID id) {
         Testimonial testimonial = getOrThrow(id);
         testimonial.unpublish();
-        return TestimonialMapper.toResponse(testimonial);
+        return toResponse(testimonial);
     }
 
     @Transactional(readOnly = true)
     List<TestimonialResponse> findAll() {
         return testimonialRepository.findAll().stream()
-                .map(TestimonialMapper::toResponse)
+                .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     List<TestimonialResponse> findAllByTenant(UUID tenantId) {
         return testimonialRepository.findAllByTenantId(tenantId).stream()
-                .map(TestimonialMapper::toResponse)
+                .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     List<TestimonialResponse> findAllVisibleOnWebsite() {
         return testimonialRepository.findAllByVisibleOnWebsiteTrueOrderByCreatedAtDesc().stream()
-                .map(TestimonialMapper::toResponse)
+                .map(this::toResponse)
                 .toList();
     }
 
     private Testimonial getOrThrow(UUID id) {
         return testimonialRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Testimonial not found: " + id));
+    }
+
+    // Partner kann zwischenzeitlich gelöscht worden sein - dann einfach kein
+    // Foto anzeigen (Snapshot-Felder wie Name/Rolle bleiben trotzdem stabil),
+    // statt die ganze Testimonial-Anzeige fehlschlagen zu lassen
+    private TestimonialResponse toResponse(Testimonial testimonial) {
+        String partnerPhotoUrl = tenantApi.findPartnerSummaryById(testimonial.getPartnerId())
+                .map(PartnerSummary::photoUrl)
+                .orElse(null);
+        return TestimonialMapper.toResponse(testimonial, partnerPhotoUrl);
+    }
+
+    private void sendInvitationEmail(PartnerSummary partner, String toEmail, String rawToken) {
+        String link = websiteProperties.baseUrl() + "/feedback?token=" + rawToken;
+        String subject = "Wir würden uns über Ihre Referenz freuen – " + partner.companyName();
+        String html = """
+                <p>Hallo %s,</p>
+                <p>vielen Dank für die Zusammenarbeit! Wir würden uns sehr über eine kurze Referenz von Ihnen freuen.</p>
+                <p><a href="%s">Hier klicken, um eine Referenz abzugeben</a></p>
+                <p>Der Link ist einmalig gültig und läuft automatisch ab.</p>
+                <p>Viele Grüße<br/>Helix GPO</p>
+                """.formatted(partner.firstName(), link);
+
+        notificationApi.send(new EmailMessage(toEmail, subject, html));
+    }
+
+    void revokeInvitation(UUID invitationId) {
+        TestimonialInvitation invitation = invitationRepository.findById(invitationId)
+                .orElseThrow(() -> new EntityNotFoundException("Invitation not found: " + invitationId));
+        invitation.revoke();
     }
 
 }

@@ -35,6 +35,15 @@ class Tenant extends BaseEntity {
     @Column(length = 30)
     private String contactPhone;
 
+    @Column(name = "logo_key", length = 500)
+    private String logoKey;
+
+    @Column(name = "website_url", length = 500)
+    private String websiteUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Builder.Default
@@ -64,6 +73,25 @@ class Tenant extends BaseEntity {
         this.legalName = legalName;
         this.vatId = vatId;
         this.referenceCode = referenceCode;
+    }
+
+    public void updateContactDetails(String contactEmail, String contactPhone, Address address, String websiteUrl) {
+        this.contactEmail = contactEmail;
+        this.contactPhone = contactPhone;
+        this.address = address;
+        this.websiteUrl = websiteUrl;
+    }
+
+    public void updateNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public void attachLogo(String key) {
+        this.logoKey = key;
+    }
+
+    public void removeLogo() {
+        this.logoKey = null;
     }
 
 }

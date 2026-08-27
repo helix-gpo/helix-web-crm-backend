@@ -67,6 +67,7 @@ public final class TestimonialDtos {
             int rating,
             TestimonialStatus status,
             boolean visibleOnWebsite,
+            String partnerPhotoUrl,
             Instant createdAt
     ) {
     }

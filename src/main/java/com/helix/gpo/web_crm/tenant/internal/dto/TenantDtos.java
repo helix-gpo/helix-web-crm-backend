@@ -20,14 +20,16 @@ public final class TenantDtos {
             String referenceCode,
             Address address,
             @Email String contactEmail,
-            String contactPhone
+            String contactPhone,
+            String websiteUrl
     ) {
     }
 
     public record UpdateContactDetailsRequest(
             @Email String contactEmail,
             String contactPhone,
-            Address address
+            Address address,
+            String websiteUrl
     ) {
     }
 
@@ -36,6 +38,11 @@ public final class TenantDtos {
             String legalName,
             String vatId,
             String referenceCode
+    ) {
+    }
+
+    public record UpdateNotesRequest(
+            String notes
     ) {
     }
 
@@ -48,8 +55,11 @@ public final class TenantDtos {
             Address address,
             String contactEmail,
             String contactPhone,
+            String websiteUrl,
+            String notes,
             TenantStatus status,
             boolean visibleOnWebsite,
+            String logoUrl,
             Instant createdAt,
             Instant updatedAt
     ) {
@@ -61,7 +71,8 @@ public final class TenantDtos {
             String lastName,
             String role,
             String email,
-            String phone
+            String phone,
+            String photoUrl
     ) {
     }
 
