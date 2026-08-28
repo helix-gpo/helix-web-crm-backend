@@ -1,18 +1,15 @@
 # todos:
-- cron jobs
 - before deployment: env table (with bank details etc.!)
 - refresh-token duration
-- n8n-ai
+- n8n-ai (website)
 
 # now:
-- validation
 - code:
   - clean code (annotations - no constructors etc. + sort methods)
   - comments (all en not ger)
-- dialogs (hover/active colors - colors in general)
 - notification module for sending (email)
-  - improve email templates + signature
-  - button on testimonial email
+  - improve email templates + signature (for both)
+  - reference button (testimonial invitation)
 
 # future:
 - invoices:

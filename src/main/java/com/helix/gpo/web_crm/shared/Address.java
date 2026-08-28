@@ -1,20 +1,11 @@
 package com.helix.gpo.web_crm.shared;
 
-import jakarta.persistence.Column;
+import jakarta.validation.constraints.Size;
 
 public record Address(
-        @Column(name = "street", length = 120)
-        String street,
-
-        @Column(name = "house_number", length = 20)
-        String houseNumber,
-
-        @Column(name = "postal_code", length = 10)
-        String postalCode,
-
-        @Column(name = "city", length = 80)
-        String city,
-
-        @Column(name = "country_code", length = 2)
-        String countryCode
+        @Size(max = 120) String street,
+        @Size(max = 20) String houseNumber,
+        @Size(max = 10) String postalCode,
+        @Size(max = 80) String city,
+        @Size(max = 2) String countryCode
 ) {}

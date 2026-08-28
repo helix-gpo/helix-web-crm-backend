@@ -5,6 +5,7 @@ import com.helix.gpo.web_crm.project.internal.ProjectStatus;
 import com.helix.gpo.web_crm.shared.Money;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -16,8 +17,10 @@ public final class ProjectDtos {
     private ProjectDtos() {
     }
 
-    public record ProjectTagDto(String value, String colorHex) {
-    }
+    public record ProjectTagDto(
+            @Size(max = 60) String value,
+            @Size(max = 7) String colorHex
+    ) {}
 
     public record CreateProjectRequest(
             @NotNull UUID tenantId,

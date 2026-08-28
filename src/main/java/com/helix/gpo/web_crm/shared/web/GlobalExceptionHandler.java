@@ -5,8 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -37,6 +40,19 @@ class GlobalExceptionHandler {
         log.warn("Entity not found: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         problem.setTitle("Nicht gefunden");
+        return problem;
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ProblemDetail handleValidation(MethodArgumentNotValidException ex) {
+        String detail = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .distinct()
+                .collect(Collectors.joining("; "));
+
+        log.warn("Validierungsfehler: {}", detail);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+        problem.setTitle("Eingabe unvollständig");
         return problem;
     }
 

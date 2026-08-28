@@ -5,10 +5,7 @@ import com.helix.gpo.web_crm.invoice.internal.LineItemSource;
 import com.helix.gpo.web_crm.shared.Address;
 import com.helix.gpo.web_crm.shared.Money;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -45,7 +42,7 @@ public final class InvoiceDtos {
     public record CreateInvoiceRequest(
             @NotNull UUID tenantId,
             UUID projectId,
-            String buyerReference,
+            @Size(max = 60) String buyerReference,
             Integer paymentTermsDays,
             @NotEmpty @Valid List<LineItemRequest> lineItems
     ) {
@@ -128,7 +125,7 @@ public final class InvoiceDtos {
     }
 
     public record UpdateInvoiceHeaderRequest(
-            String buyerReference,
+            @Size(max = 60) String buyerReference,
             Integer paymentTermsDays
     ) {
     }
