@@ -22,16 +22,15 @@ import java.util.UUID;
 class TestimonialService {
 
     private static final int DEFAULT_EXPIRY_DAYS = 30;
-
-    // Gleiche redaktionelle Obergrenze wie bei Projekten - Website-Sektion
-    // "Referenzen" zeigt maximal 6 Karten
     private static final int MAX_VISIBLE_ON_WEBSITE = 6;
 
     private final TestimonialInvitationRepository invitationRepository;
     private final TestimonialRepository testimonialRepository;
-    private final TokenGenerator tokenGenerator;
+
     private final TenantApi tenantApi;
     private final NotificationApi notificationApi;
+
+    private final TokenGenerator tokenGenerator;
     private final WebsiteProperties websiteProperties;
 
     InvitationResponse createInvitation(CreateInvitationRequest request) {
@@ -67,7 +66,6 @@ class TestimonialService {
             invitationRepository.save(invitation);
         }
 
-        // rawToken existiert ab jetzt NUR noch in diesem Response - nirgends persistiert
         return new InvitationResponse(invitation.getId(), rawToken, expiresAt, sendEmail, sentToEmail);
     }
 
@@ -169,9 +167,6 @@ class TestimonialService {
                 .orElseThrow(() -> new EntityNotFoundException("Diese Referenz wurde nicht gefunden."));
     }
 
-    // Partner kann zwischenzeitlich gelöscht worden sein - dann einfach kein
-    // Foto anzeigen (Snapshot-Felder wie Name/Rolle bleiben trotzdem stabil),
-    // statt die ganze Testimonial-Anzeige fehlschlagen zu lassen
     private TestimonialResponse toResponse(Testimonial testimonial) {
         String partnerPhotoUrl = tenantApi.findPartnerSummaryById(testimonial.getPartnerId())
                 .map(PartnerSummary::photoUrl)

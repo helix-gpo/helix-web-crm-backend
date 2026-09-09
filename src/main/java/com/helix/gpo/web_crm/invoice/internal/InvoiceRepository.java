@@ -10,8 +10,6 @@ interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
     List<Invoice> findAllByTenantId(UUID tenantId);
 
-    List<Invoice> findAllByProjectId(UUID projectId);
-
     long countByTenantId(UUID tenantId);
 
     List<Invoice> findAllByStatusInAndDueDateBefore(List<InvoiceStatus> statuses, LocalDate date);

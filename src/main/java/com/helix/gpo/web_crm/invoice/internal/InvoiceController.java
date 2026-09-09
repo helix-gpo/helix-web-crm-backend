@@ -35,8 +35,6 @@ class InvoiceController {
         return invoiceService.findById(id);
     }
 
-    // Ersetzt die alte findAllByTenant(@RequestParam UUID tenantId) - genau
-    // die Doppelbelegung war die Ursache des Ambiguous-Mapping-Fehlers
     @GetMapping
     List<InvoiceResponse> findAll(@RequestParam(required = false) UUID tenantId) {
         return tenantId != null ? invoiceService.findAllByTenant(tenantId) : invoiceService.findAll();

@@ -5,8 +5,6 @@ import java.util.UUID;
 
 public interface TenantApi {
 
-    Optional<TenantSummary> findSummaryById(UUID tenantId);
-
     boolean existsAndIsActive(UUID tenantId);
 
     Optional<TenantBillingDetails> findBillingDetailsById(UUID tenantId);

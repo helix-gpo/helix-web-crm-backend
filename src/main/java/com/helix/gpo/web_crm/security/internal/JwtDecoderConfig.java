@@ -24,7 +24,6 @@ class JwtDecoderConfig {
     JwtDecoder jwtDecoder() {
         NimbusJwtDecoder decoder = JwtDecoders.fromIssuerLocation(issuerUri);
 
-        // Standard-Validierung (Signatur, Issuer, Ablaufzeit) + unser Cognito-Check kombiniert
         OAuth2TokenValidator<org.springframework.security.oauth2.jwt.Jwt> defaultValidator =
                 JwtValidators.createDefaultWithIssuer(issuerUri);
 

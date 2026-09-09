@@ -27,9 +27,6 @@ class Testimonial extends BaseEntity {
     @Column(name = "project_id")
     private UUID projectId;
 
-    // Schnappschuss der Partner-/Mandanten-Daten zum Einreichzeitpunkt -
-    // gleiches Prinzip wie seller/buyer bei Invoice: bleibt stabil, auch
-    // wenn sich der Partner-Datensatz später ändert oder gelöscht wird
     @Column(name = "partner_name_snapshot", nullable = false, length = 200)
     private String partnerNameSnapshot;
 

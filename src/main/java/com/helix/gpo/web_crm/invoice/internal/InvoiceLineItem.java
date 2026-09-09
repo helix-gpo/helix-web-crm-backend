@@ -30,7 +30,6 @@ class InvoiceLineItem extends BaseEntity {
     @Column(nullable = false, length = 20)
     private LineItemSource source;
 
-    // Nur befüllt, wenn source == MILESTONE - rohe UUID, keine Cross-Modul-Relation
     @Column(name = "milestone_id")
     private UUID milestoneId;
 
@@ -41,7 +40,7 @@ class InvoiceLineItem extends BaseEntity {
     @Builder.Default
     private BigDecimal quantity = BigDecimal.ONE;
 
-    // UN/CEFACT Mengeneinheiten-Code, Pflichtfeld in XRechnung (z.B. "C62" = Stück, "HUR" = Stunde, "DAY" = Tag)
+    // e.g. "C62" = amount, "HUR" = hour, "DAY" = day
     @Column(name = "unit_code", nullable = false, length = 10)
     @Builder.Default
     private String unitCode = "C62";
@@ -51,7 +50,6 @@ class InvoiceLineItem extends BaseEntity {
     @AttributeOverride(name = "currencyCode", column = @Column(name = "unit_price_currency", nullable = false))
     private Money unitPrice;
 
-    // Prozentsatz, nicht der Steuerbetrag selbst - der wird abgeleitet berechnet
     @Column(name = "tax_rate_percentage", nullable = false, precision = 5, scale = 2)
     @Builder.Default
     private BigDecimal taxRatePercentage = new BigDecimal("19.00");

@@ -19,8 +19,6 @@ import java.util.UUID;
 @Table(name = "projects")
 class Project extends BaseEntity {
 
-    // Bewusst nur die rohe ID, KEINE @ManyToOne-Relation zum tenant-Modul -
-    // Modulgrenze bleibt sauber, Zugriff auf Tenant-Daten läuft über TenantApi
     @Column(name = "tenant_id", nullable = false)
     private UUID tenantId;
 

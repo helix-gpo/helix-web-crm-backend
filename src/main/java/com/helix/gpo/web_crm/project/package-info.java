@@ -1,4 +1,3 @@
-// project/package-info.java
 @org.springframework.modulith.ApplicationModule(
         displayName = "Project Management",
         allowedDependencies = {"tenant", "shared", "storage"}

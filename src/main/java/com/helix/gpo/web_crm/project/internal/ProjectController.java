@@ -31,7 +31,6 @@ class ProjectController {
         return projectService.findById(id);
     }
 
-    // Ersetzt die alte findAllByTenant(@RequestParam UUID tenantId)
     @GetMapping
     List<ProjectResponse> findAll(@RequestParam(required = false) UUID tenantId) {
         return tenantId != null ? projectService.findAllByTenant(tenantId) : projectService.findAll();

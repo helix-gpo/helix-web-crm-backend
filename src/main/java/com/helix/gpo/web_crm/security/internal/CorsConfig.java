@@ -14,15 +14,11 @@ class CorsConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration crmConfiguration = new CorsConfiguration();
-        // Lokale CRM-SPA - produktive Domain (z.B. https://crm.helix-gpo.com) hier später ergänzen
         crmConfiguration.setAllowedOrigins(List.of("http://localhost:4200"));
         crmConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         crmConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         crmConfiguration.setAllowCredentials(true);
 
-        // Öffentliche Website - kein Auth-Header, daher allowCredentials(false).
-        // localhost:4201, weil die Website standardmäßig auch auf 4200 laufen
-        // würde (Konflikt mit dem CRM-Dev-Server) - siehe Hinweis unten
         CorsConfiguration publicConfiguration = new CorsConfiguration();
         publicConfiguration.setAllowedOrigins(List.of(
                 "http://localhost:4201",

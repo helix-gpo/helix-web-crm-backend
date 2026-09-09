@@ -24,8 +24,6 @@ public final class TestimonialDtos {
     ) {
     }
 
-    // rawToken wird NUR hier, einmalig, im Response zurückgegeben - danach
-    // existiert er nirgends mehr im System (nur der Hash in der DB)
     public record InvitationResponse(
             UUID invitationId,
             String rawToken,

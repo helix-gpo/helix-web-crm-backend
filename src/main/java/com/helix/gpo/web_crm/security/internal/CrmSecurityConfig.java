@@ -20,7 +20,7 @@ class CrmSecurityConfig {
 
     @Bean
     @Order(2)
-    SecurityFilterChain crmSecurityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain crmSecurityFilterChain(HttpSecurity http) {
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(cognitoGrantedAuthoritiesConverter);
 

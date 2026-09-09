@@ -4,7 +4,6 @@ import com.helix.gpo.web_crm.storage.StorageApi;
 import com.helix.gpo.web_crm.tenant.PartnerSummary;
 import com.helix.gpo.web_crm.tenant.TenantApi;
 import com.helix.gpo.web_crm.tenant.TenantBillingDetails;
-import com.helix.gpo.web_crm.tenant.TenantSummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +17,8 @@ class TenantApiImpl implements TenantApi {
 
     private final TenantRepository tenantRepository;
     private final PartnerRepository partnerRepository;
-    private final StorageApi storageApi;
 
-    @Override
-    public Optional<TenantSummary> findSummaryById(UUID tenantId) {
-        return tenantRepository.findById(tenantId).map(TenantMapper::toSummary);
-    }
+    private final StorageApi storageApi;
 
     @Override
     public boolean existsAndIsActive(UUID tenantId) {

@@ -1,12 +1,8 @@
 spring:
   application:
-    name: helix-crm
+    name: helix-gpo-web-crm
   profiles:
     active: ${ACTIVE_SPRING_PROFILE:dev}
-  servlet:
-    multipart:
-      max-file-size: 5MB
-      max-request-size: 5MB
   security:
     oauth2:
       resourceserver:
@@ -18,21 +14,18 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    hibernate:
-      ddl-auto: update
     open-in-view: false
     show-sql: false
     properties:
       hibernate:
         format_sql: false
-
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
 
 server:
-  port: 8081
+  port: ${SERVER_PORT:8081}
 
 logging:
   level:
@@ -42,18 +35,17 @@ helix:
   company:
     name: Helix GPO
     legal-name: Helix GPO UG (haftungsbeschränkt) & Co. KG
-    vat-id: ${HELIX_VAT_ID:DE1234567890}
+    vat-id: ${HELIX_VAT_ID}
     address:
       street: Erftstraße
       house-number: "50"
       postal-code: "41460"
       city: Neuss
       country-code: DE
-    email: helix.gpo@gmail.com
-    iban: ${HELIX_IBAN:DE43300700240795085000}
-    bic: ${HELIX_BIC:DEUTDEDBDUE}
+    email: ${HELIX_COMPANY_EMAIL:helix.gpo@gmail.com}
+    iban: ${HELIX_IBAN}
+    bic: ${HELIX_BIC}
   security:
-    public-ip-allowlist: ${PUBLIC_IP_ALLOWLIST}
     cognito:
       client-id: ${COGNITO_CLIENT_ID}
   s3:
@@ -63,7 +55,6 @@ helix:
     sender-email: ${NOTIFICATION_SENDER_EMAIL:noreply@helix-gpo.com}
     sender-name: ${NOTIFICATION_SENDER_NAME:Helix GPO}
     reply-to-email: ${NOTIFICATION_REPLY_TO_EMAIL:helix.gpo@gmail.com}
-    logo-url: ${NOTIFICATION_LOGO_URL:http://localhost:4200/public/images/logo-no-bg.svg}
     region: eu-central-1
   website:
     base-url: ${WEBSITE_BASE_URL:http://localhost:4201}

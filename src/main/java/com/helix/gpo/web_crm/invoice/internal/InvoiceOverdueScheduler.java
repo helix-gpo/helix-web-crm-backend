@@ -16,9 +16,8 @@ class InvoiceOverdueScheduler {
 
     private final InvoiceRepository invoiceRepository;
 
-    // Täglich um 00:15 Uhr - kurz nach Mitternacht, damit der komplette
-    // Fälligkeitstag selbst noch als "pünktlich" zählt
-    @Scheduled(cron = "0 15 0 * * *")
+    // daily cronjob at 03:00 am updates each invoice status (compare to due date)
+    @Scheduled(cron = "0 0 3 * * *")
     @Transactional
     void markOverdueInvoices() {
         List<Invoice> candidates = invoiceRepository.findAllByStatusInAndDueDateBefore(

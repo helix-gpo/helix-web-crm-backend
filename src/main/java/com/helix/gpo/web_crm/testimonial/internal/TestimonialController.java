@@ -14,8 +14,7 @@ class TestimonialController {
 
     private final TestimonialService testimonialService;
 
-    // ---- CRM (intern, benötigt später JWT-Auth) ----
-
+    // private api for crm
     @PostMapping("/api/crm/testimonial-invitations")
     InvitationResponse createInvitation(@Valid @RequestBody CreateInvitationRequest request) {
         return testimonialService.createInvitation(request);
@@ -56,8 +55,7 @@ class TestimonialController {
         return testimonialService.unpublish(id);
     }
 
-    // ---- Öffentlich (Website-Feedback-Formular), Legitimation via Token statt API-Key ----
-
+    // public api for website
     @PostMapping("/api/public/testimonials/submit")
     TestimonialResponse submit(@Valid @RequestBody SubmitTestimonialRequest request) {
         return testimonialService.submit(request);

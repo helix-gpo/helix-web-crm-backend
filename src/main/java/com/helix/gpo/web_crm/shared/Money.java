@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Currency;
 
 @Embeddable
 public record Money(
@@ -22,10 +21,6 @@ public record Money(
         }
     }
 
-    public static Money eur(BigDecimal amount) {
-        return new Money(amount, "EUR");
-    }
-
     public Money add(Money other) {
         requireSameCurrency(other);
         return new Money(this.amount.add(other.amount), this.currencyCode);
@@ -39,10 +34,6 @@ public record Money(
         if (!this.currencyCode.equals(other.currencyCode)) {
             throw new IllegalArgumentException("Unterschiedliche Währungen können nicht verrechnet werden: " + this.currencyCode + " / " + other.currencyCode);
         }
-    }
-
-    public Currency toCurrency() {
-        return Currency.getInstance(currencyCode);
     }
 
 }

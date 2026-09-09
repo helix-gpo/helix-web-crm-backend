@@ -13,6 +13,7 @@ import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.sesv2.SesV2Client;
@@ -21,7 +22,7 @@ import software.amazon.awssdk.services.sesv2.model.SendEmailRequest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.InputStream;
 import java.util.Properties;
 
 @Component
@@ -52,30 +53,56 @@ class EmailService implements NotificationApi {
                         new InternetAddress(properties.replyToEmail())
                 });
             }
-        } catch (UnsupportedEncodingException e) {
+        } catch (java.io.UnsupportedEncodingException e) {
             throw new NotificationException("Ungültige Absenderadresse konfiguriert", e);
         }
 
         mimeMessage.setRecipients(Message.RecipientType.TO, message.to());
         mimeMessage.setSubject(message.subject(), "UTF-8");
 
-        MimeMultipart multipart = new MimeMultipart("mixed");
+        String fullHtml = EmailLayout.wrap(message.preheader(), message.bodyHtml());
 
-        String fullHtml = EmailLayout.wrap(properties.logoUrl(), message.preheader(), message.bodyHtml());
+        MimeMultipart relatedMultipart = new MimeMultipart("related");
 
         MimeBodyPart htmlPart = new MimeBodyPart();
         htmlPart.setContent(fullHtml, "text/html; charset=UTF-8");
-        multipart.addBodyPart(htmlPart);
+        relatedMultipart.addBodyPart(htmlPart);
 
-        for (EmailAttachment attachment : message.attachments()) {
-            MimeBodyPart attachmentPart = new MimeBodyPart();
-            attachmentPart.setFileName(attachment.filename());
-            attachmentPart.setContent(attachment.content(), attachment.contentType());
-            multipart.addBodyPart(attachmentPart);
+        MimeBodyPart logoPart = new MimeBodyPart();
+        logoPart.setContent(loadLogoBytes(), "image/png");
+        logoPart.setContentID("<logo>");
+        logoPart.setDisposition(MimeBodyPart.INLINE);
+        logoPart.setFileName("logo.png");
+        relatedMultipart.addBodyPart(logoPart);
+
+        if (message.attachments().isEmpty()) {
+            mimeMessage.setContent(relatedMultipart);
+        } else {
+            MimeMultipart mixedMultipart = new MimeMultipart("mixed");
+
+            MimeBodyPart relatedWrapper = new MimeBodyPart();
+            relatedWrapper.setContent(relatedMultipart);
+            mixedMultipart.addBodyPart(relatedWrapper);
+
+            for (EmailAttachment attachment : message.attachments()) {
+                MimeBodyPart attachmentPart = new MimeBodyPart();
+                attachmentPart.setFileName(attachment.filename());
+                attachmentPart.setContent(attachment.content(), attachment.contentType());
+                mixedMultipart.addBodyPart(attachmentPart);
+            }
+
+            mimeMessage.setContent(mixedMultipart);
         }
 
-        mimeMessage.setContent(multipart);
         return mimeMessage;
+    }
+
+    private byte[] loadLogoBytes() {
+        try (InputStream in = new ClassPathResource("notification/logo.png").getInputStream()) {
+            return in.readAllBytes();
+        } catch (IOException e) {
+            throw new NotificationException("Logo-Datei konnte nicht geladen werden", e);
+        }
     }
 
     private SendEmailRequest toSendRequest(MimeMessage mimeMessage) {

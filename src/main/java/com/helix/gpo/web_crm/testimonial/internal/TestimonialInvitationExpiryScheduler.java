@@ -16,9 +16,8 @@ class TestimonialInvitationExpiryScheduler {
 
     private final TestimonialInvitationRepository invitationRepository;
 
-    // Täglich um 00:30 Uhr - bewusst zeitlich versetzt zum Invoice-Scheduler,
-    // damit nicht beide Jobs exakt gleichzeitig auf die DB zugreifen
-    @Scheduled(cron = "0 30 0 * * *")
+    // daily cronjob - after invoice cronjob - marks overdue testimonials as expired
+    @Scheduled(cron = "0 30 3 * * *")
     @Transactional
     void expireInvitations() {
         List<TestimonialInvitation> candidates = invitationRepository

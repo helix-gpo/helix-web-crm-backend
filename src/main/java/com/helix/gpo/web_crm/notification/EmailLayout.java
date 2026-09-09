@@ -5,7 +5,7 @@ public final class EmailLayout {
     private EmailLayout() {
     }
 
-    public static String wrap(String logoUrl, String preheader, String bodyHtml) {
+    public static String wrap(String preheader, String bodyHtml) {
         return """
                 <!DOCTYPE html>
                 <html lang="de">
@@ -21,7 +21,7 @@ public final class EmailLayout {
                         <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow: 0 1px 3px rgba(13,20,36,0.08); max-width:560px;">
                           <tr>
                             <td style="padding: 28px 40px; border-bottom: 1px solid #eef0f3;">
-                              <img src="%s" alt="Helix GPO" height="32" style="display:block; height:32px;">
+                              <img src="cid:logo" alt="Helix GPO" height="32" style="display:block; height:32px;">
                             </td>
                           </tr>
                           <tr>
@@ -41,7 +41,7 @@ public final class EmailLayout {
                   </table>
                 </body>
                 </html>
-                """.formatted(preheader, logoUrl, bodyHtml);
+                """.formatted(preheader, bodyHtml);
     }
 
     public static String button(String label, String url) {
@@ -55,4 +55,5 @@ public final class EmailLayout {
                 </table>
                 """.formatted(url, label);
     }
+
 }

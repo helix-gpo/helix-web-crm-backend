@@ -18,16 +18,7 @@ public final class InvoiceDtos {
     private InvoiceDtos() {
     }
 
-    public record BillingPartyDto(
-            String name,
-            String vatId,
-            Address address,
-            String email,
-            String iban,
-            String bic
-    ) {
-    }
-
+    // create
     public record LineItemRequest(
             @NotNull LineItemSource source,
             UUID milestoneId,
@@ -48,6 +39,24 @@ public final class InvoiceDtos {
     ) {
     }
 
+    // update
+    public record UpdateInvoiceHeaderRequest(
+            @Size(max = 60) String buyerReference,
+            Integer paymentTermsDays
+    ) {
+    }
+
+    // nested resource: line items
+    public record UpdateLineItemRequest(
+            @NotBlank String description,
+            BigDecimal quantity,
+            String unitCode,
+            @NotNull Money unitPrice,
+            BigDecimal taxRatePercentage
+    ) {
+    }
+
+    // workflow actions, in business-process order: issue -> send -> mark paid
     public record IssueInvoiceRequest(
             LocalDate issueDate,
             Boolean sendEmailDirectly,
@@ -55,6 +64,17 @@ public final class InvoiceDtos {
     ) {
     }
 
+    public record SendInvoiceRequest(
+            @Email String email
+    ) {
+    }
+
+    public record MarkPaidRequest(
+            LocalDate paidDate
+    ) {
+    }
+
+    // responses
     public record InvoiceLineItemResponse(
             UUID id,
             int positionNumber,
@@ -68,6 +88,16 @@ public final class InvoiceDtos {
             Money netAmount,
             Money taxAmount,
             Money grossAmount
+    ) {
+    }
+
+    public record BillingPartyDto(
+            String name,
+            String vatId,
+            Address address,
+            String email,
+            String iban,
+            String bic
     ) {
     }
 
@@ -97,13 +127,7 @@ public final class InvoiceDtos {
     ) {
     }
 
-    public record MarkPaidRequest(
-            LocalDate paidDate
-    ) {
-    }
-
-    // ---- Prefill: alles, was das Frontend braucht, um das Erstell-Formular zu befüllen ----
-
+    // ui support: prefill for the create form, not a persisted resource
     public record MilestoneOptionDto(
             UUID id,
             String title,
@@ -121,26 +145,6 @@ public final class InvoiceDtos {
             boolean buyerDataComplete,
             String suggestedBuyerReference,
             List<MilestoneOptionDto> availableMilestones
-    ) {
-    }
-
-    public record UpdateInvoiceHeaderRequest(
-            @Size(max = 60) String buyerReference,
-            Integer paymentTermsDays
-    ) {
-    }
-
-    public record UpdateLineItemRequest(
-            @NotBlank String description,
-            BigDecimal quantity,
-            String unitCode,
-            @NotNull Money unitPrice,
-            BigDecimal taxRatePercentage
-    ) {
-    }
-
-    public record SendInvoiceRequest(
-            @Email String email
     ) {
     }
 

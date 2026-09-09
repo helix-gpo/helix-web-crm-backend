@@ -15,11 +15,11 @@ class CognitoGrantedAuthoritiesConverter implements Converter<Jwt, Collection<Gr
     @Override
     public Collection<GrantedAuthority> convert(Jwt jwt) {
         List<String> groups = jwt.getClaimAsStringList("cognito:groups");
+
         if (groups == null) {
             return List.of();
         }
 
-        // "admin" -> "ROLE_ADMIN", damit hasRole("ADMIN") in Security-Configs funktioniert
         return groups.stream()
                 .map(group -> (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + group.toUpperCase()))
                 .toList();

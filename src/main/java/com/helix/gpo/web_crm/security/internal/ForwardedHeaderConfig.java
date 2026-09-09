@@ -12,8 +12,6 @@ class ForwardedHeaderConfig {
     FilterRegistrationBean<ForwardedHeaderFilter> forwardedHeaderFilter() {
         FilterRegistrationBean<ForwardedHeaderFilter> registration =
                 new FilterRegistrationBean<>(new ForwardedHeaderFilter());
-        // Muss vor allen anderen sicherheitsrelevanten Filtern laufen,
-        // damit getRemoteAddr() schon die echte Client-IP liefert
         registration.setOrder(org.springframework.core.Ordered.HIGHEST_PRECEDENCE);
         return registration;
     }

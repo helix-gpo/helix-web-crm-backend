@@ -15,11 +15,7 @@ class InvoiceNumberGenerator {
 
     private final InvoiceSequenceRepository sequenceRepository;
 
-    // MANDATORY statt REQUIRED: erzwingt, dass diese Methode NUR innerhalb
-    // einer bestehenden Transaktion aufgerufen wird (nämlich der von
-    // InvoiceService.issue()) - läuft sie in einer eigenen Transaktion,
-    // würde der Lock schon vor dem Rechnung-Speichern wieder freigegeben,
-    // und die Atomaritäts-Garantie wäre futsch
+    // secure that only one invoice is saved at one time - avoid saving a new invoice during save process of another invoice
     @Transactional(propagation = Propagation.MANDATORY)
     String generateNext() {
         int currentYear = Year.now().getValue();

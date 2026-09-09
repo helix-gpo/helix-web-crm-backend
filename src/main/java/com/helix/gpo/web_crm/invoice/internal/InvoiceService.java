@@ -32,11 +32,13 @@ class InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
     private final InvoiceLineItemRepository invoiceLineItemRepository;
-    private final InvoiceNumberGenerator invoiceNumberGenerator;
+
     private final TenantApi tenantApi;
     private final ProjectApi projectApi;
     private final StorageApi storageApi;
     private final NotificationApi notificationApi;
+
+    private final InvoiceNumberGenerator invoiceNumberGenerator;
     private final CompanyBillingProperties companyBillingProperties;
     private final InvoicePdfService invoicePdfService;
 
@@ -64,7 +66,7 @@ class InvoiceService {
 
     private String generateAutoReference(TenantBillingDetails tenant) {
         if (tenant.referenceCode() == null || tenant.referenceCode().isBlank()) {
-            return null; // kein Kürzel gepflegt - keine automatische Referenz möglich
+            return null; // reference code should always be not empty
         }
         long existingCount = invoiceRepository.countByTenantId(tenant.tenantId());
         return tenant.referenceCode() + "." + (existingCount + 1);
@@ -205,9 +207,6 @@ class InvoiceService {
                 .toList();
     }
 
-    // Genau das, was das Frontend zum Vorbefüllen des Erstell-Formulars braucht:
-    // vorgeschlagener Verkäufer (eure Stammdaten), vorgeschlagener Käufer (Mandant),
-    // und alle wählbaren Meilensteine mit Preis + Info, ob schon abgerechnet
     @Transactional(readOnly = true)
     InvoicePrefillResponse prefill(UUID tenantId, UUID projectId) {
         TenantBillingDetails tenant = tenantApi.findBillingDetailsById(tenantId)
@@ -340,11 +339,6 @@ class InvoiceService {
                 );
             }
         }
-    }
-
-    private String generateInvoiceNumber() {
-        // Platzhalter - lückenlose Sequenz bauen wir, sobald wir konkret XRechnung umsetzen
-        return "INV-" + LocalDate.now().getYear() + "-" + System.currentTimeMillis();
     }
 
     private Invoice getInvoiceOrThrow(UUID id) {

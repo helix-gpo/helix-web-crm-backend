@@ -25,7 +25,6 @@ class TestimonialInvitation extends BaseEntity {
     @Column(name = "project_id")
     private UUID projectId;
 
-    // Nur der Hash wird gespeichert - der Rohtoken existiert nie in der DB
     @Column(name = "token_hash", nullable = false, unique = true, length = 64)
     private String tokenHash;
 

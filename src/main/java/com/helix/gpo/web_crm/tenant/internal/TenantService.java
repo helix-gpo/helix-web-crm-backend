@@ -24,6 +24,7 @@ class TenantService {
 
     private final TenantRepository tenantRepository;
     private final PartnerRepository partnerRepository;
+
     private final StorageApi storageApi;
 
     TenantResponse create(CreateTenantRequest request) {

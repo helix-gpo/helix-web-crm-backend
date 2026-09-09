@@ -17,8 +17,8 @@ public final class TenantDtos {
     public record CreateTenantRequest(
             @NotBlank String companyName,
             String legalName,
-            @Size(max = 20) String vatId,
-            @Size(max = 12) String referenceCode,
+            String vatId,
+            @NotBlank @Size(max = 12) String referenceCode,
             Address address,
             @Email String contactEmail,
             String contactPhone,
@@ -38,7 +38,7 @@ public final class TenantDtos {
             @NotBlank String companyName,
             String legalName,
             @Size(max = 20) String vatId,
-            @Size(max = 12) String referenceCode
+            @NotBlank @Size(max = 12) String referenceCode
     ) {
     }
 

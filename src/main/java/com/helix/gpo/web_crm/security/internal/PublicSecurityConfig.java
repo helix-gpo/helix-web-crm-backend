@@ -13,10 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableConfigurationProperties(CognitoProperties.class)
 class PublicSecurityConfig {
 
-    // Echt öffentlich - erreichbar von jedem Website-Besucher-Browser, nicht
-    // mehr IP-beschränkt. Die IP-Allowlist (IpAllowlistAuthorizationManager)
-    // war für Server-zu-Server-Calls gedacht und hätte hier jeden echten
-    // Website-Besucher ausgesperrt.
+    // public security filter chain for our website
     @Bean
     @Order(1)
     SecurityFilterChain publicApiSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -30,9 +27,7 @@ class PublicSecurityConfig {
         return http.build();
     }
 
-    // Sicherheitsnetz: alles, was nicht /api/public/** oder /api/crm/** ist,
-    // wird pauschal blockiert - verhindert versehentlich offene Endpunkte
-    // (z.B. Actuator), falls die mal ohne explizite Config dazukommen
+    // default filter chain for other endpoints (others than website and crm endpoints)
     @Bean
     @Order(3)
     SecurityFilterChain defaultDenyFilterChain(HttpSecurity http) throws Exception {

@@ -8,9 +8,7 @@ import java.util.Optional;
 
 interface InvoiceSequenceRepository extends JpaRepository<InvoiceSequence, Integer> {
 
-    // PESSIMISTIC_WRITE = SELECT ... FOR UPDATE - sperrt die Zeile bis zum
-    // Transaktionsende, damit zwei gleichzeitige Rechnung-Erstellungen
-    // garantiert nacheinander (nicht parallel) eine Nummer ziehen
+    // PESSIMISTIC_WRITE = SELECT ... FOR UPDATE - avoid two invoice generations simultaneously
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<InvoiceSequence> findById(Integer year);
 

@@ -16,9 +16,6 @@ class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    // Fachliche Zustandsverletzungen - 409, weil der Request an sich
-    // gültig war, der aktuelle Zustand die Aktion aber verhindert.
-    // WARN reicht hier, das sind erwartete/gewollte Fälle (z.B. 6er-Limit)
     @ExceptionHandler(IllegalStateException.class)
     ProblemDetail handleIllegalState(IllegalStateException ex) {
         log.warn("Illegal state: {}", ex.getMessage());
@@ -56,9 +53,6 @@ class GlobalExceptionHandler {
         return problem;
     }
 
-    // Letzte Auffanglinie - hier ist der volle Stacktrace WICHTIG im Log,
-    // auch wenn der Client nur die generische Meldung sieht. ERROR-Level,
-    // mit ex als letztem Argument -> SLF4J loggt den kompletten Stacktrace.
     @ExceptionHandler(Exception.class)
     ProblemDetail handleUnexpected(Exception ex) {
         log.error("Unerwarteter Fehler bei der Anfrageverarbeitung", ex);
