@@ -2,6 +2,7 @@ package com.helix.gpo.web_crm.project.internal;
 
 import com.helix.gpo.web_crm.project.MilestoneSummary;
 import com.helix.gpo.web_crm.project.ProjectApi;
+import com.helix.gpo.web_crm.project.ProjectSummary;
 import com.helix.gpo.web_crm.project.PublicProjectSummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,11 @@ class ProjectApiImpl implements ProjectApi {
 
     private final ProjectRepository projectRepository;
     private final MilestoneRepository milestoneRepository;
+
+    @Override
+    public Optional<ProjectSummary> findSummaryById(UUID projectId) {
+        return projectRepository.findById(projectId).map(ProjectMapper::toSummary);
+    }
 
     @Override
     public Optional<MilestoneSummary> findMilestoneSummaryById(UUID milestoneId) {

@@ -6,6 +6,8 @@ import java.util.UUID;
 
 public interface ProjectApi {
 
+    Optional<ProjectSummary> findSummaryById(UUID projectId);
+
     Optional<MilestoneSummary> findMilestoneSummaryById(UUID milestoneId);
 
     List<MilestoneSummary> findMilestoneSummariesByProject(UUID projectId);
