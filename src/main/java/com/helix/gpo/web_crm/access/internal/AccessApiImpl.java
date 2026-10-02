@@ -99,12 +99,17 @@ class AccessApiImpl implements AccessApi {
         }
     }
 
-    private Optional<Employee> currentEmployee() {
+    @Override
+    public String currentUserEmail() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !(auth.getPrincipal() instanceof Jwt jwt)) {
-            return Optional.empty();
+        if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
+            return jwt.getClaimAsString("email");
         }
-        String email = jwt.getClaimAsString("email");
+        return null;
+    }
+
+    private Optional<Employee> currentEmployee() {
+        String email = currentUserEmail();
         if (email == null) {
             return Optional.empty();
         }

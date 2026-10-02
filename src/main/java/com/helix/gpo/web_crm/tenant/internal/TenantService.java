@@ -51,7 +51,7 @@ class TenantService {
     TenantResponse findById(UUID id) {
         accessApi.requireRead(EntityType.TENANT);
         Tenant tenant = getTenantOrThrow(id);
-        requireTenantAccess(tenant.getId());
+        requireTenantAccess(tenant);
         return toResponse(tenant);
     }
 
@@ -66,7 +66,8 @@ class TenantService {
     @Transactional(readOnly = true)
     List<TenantDtos.PartnerResponse> findPartnersByTenant(UUID tenantId) {
         accessApi.requireRead(EntityType.PARTNER);
-        requireTenantAccess(tenantId);
+        Tenant tenant = getTenantOrThrow(tenantId);
+        requireTenantAccess(tenant);
 
         return partnerRepository.findAllByTenantId(tenantId).stream()
                 .map(this::toPartnerResponse)
@@ -76,7 +77,7 @@ class TenantService {
     TenantResponse updateContactDetails(UUID id, UpdateContactDetailsRequest request) {
         accessApi.requireWrite(EntityType.TENANT);
         Tenant tenant = getTenantOrThrow(id);
-        requireTenantAccess(tenant.getId());
+        requireTenantAccess(tenant);
 
         tenant.updateContactDetails(request.contactEmail(), request.contactPhone(), request.address(), request.websiteUrl());
         return toResponse(tenant);
@@ -85,7 +86,7 @@ class TenantService {
     TenantResponse updateNotes(UUID id, TenantDtos.UpdateNotesRequest request) {
         accessApi.requireWrite(EntityType.TENANT);
         Tenant tenant = getTenantOrThrow(id);
-        requireTenantAccess(tenant.getId());
+        requireTenantAccess(tenant);
 
         tenant.updateNotes(request.notes());
         return toResponse(tenant);
@@ -94,7 +95,7 @@ class TenantService {
     TenantResponse activate(UUID id) {
         accessApi.requireWrite(EntityType.TENANT);
         Tenant tenant = getTenantOrThrow(id);
-        requireTenantAccess(tenant.getId());
+        requireTenantAccess(tenant);
 
         tenant.activate();
         return toResponse(tenant);
@@ -103,7 +104,7 @@ class TenantService {
     TenantResponse archive(UUID id) {
         accessApi.requireWrite(EntityType.TENANT);
         Tenant tenant = getTenantOrThrow(id);
-        requireTenantAccess(tenant.getId());
+        requireTenantAccess(tenant);
 
         tenant.archive();
         return toResponse(tenant);
@@ -112,7 +113,7 @@ class TenantService {
     TenantResponse updateCoreDetails(UUID id, TenantDtos.UpdateCoreDetailsRequest request) {
         accessApi.requireWrite(EntityType.TENANT);
         Tenant tenant = getTenantOrThrow(id);
-        requireTenantAccess(tenant.getId());
+        requireTenantAccess(tenant);
 
         tenant.updateCoreDetails(request.companyName(), request.legalName(), request.vatId(), request.referenceCode());
         return toResponse(tenant);
@@ -121,7 +122,7 @@ class TenantService {
     TenantResponse uploadLogo(UUID tenantId, MultipartFile file) {
         accessApi.requireWrite(EntityType.TENANT);
         Tenant tenant = getTenantOrThrow(tenantId);
-        requireTenantAccess(tenant.getId());
+        requireTenantAccess(tenant);
 
         ImageUploadValidator.validate(file);
 
@@ -143,7 +144,7 @@ class TenantService {
     TenantResponse removeLogo(UUID tenantId) {
         accessApi.requireWrite(EntityType.TENANT);
         Tenant tenant = getTenantOrThrow(tenantId);
-        requireTenantAccess(tenant.getId());
+        requireTenantAccess(tenant);
 
         if (tenant.getLogoKey() != null) {
             storageApi.delete(tenant.getLogoKey());
@@ -155,7 +156,7 @@ class TenantService {
     TenantDtos.PartnerResponse addPartner(UUID tenantId, TenantDtos.CreatePartnerRequest request) {
         accessApi.requireWrite(EntityType.PARTNER);
         Tenant tenant = getTenantOrThrow(tenantId);
-        requireTenantAccess(tenant.getId());
+        requireTenantAccess(tenant);
 
         Partner partner = Partner.builder()
                 .tenant(tenant)
@@ -172,7 +173,7 @@ class TenantService {
     TenantDtos.PartnerResponse updatePartner(UUID partnerId, TenantDtos.UpdatePartnerRequest request) {
         accessApi.requireWrite(EntityType.PARTNER);
         Partner partner = getPartnerOrThrow(partnerId);
-        requireTenantAccess(partner.getTenant().getId());
+        requireTenantAccess(partner.getTenant());
 
         partner.updateDetails(request.firstName(), request.lastName(), request.role(), request.email(), request.phone());
         return toPartnerResponse(partner);
@@ -181,7 +182,7 @@ class TenantService {
     void removePartner(UUID partnerId) {
         accessApi.requireDelete(EntityType.PARTNER);
         Partner partner = getPartnerOrThrow(partnerId);
-        requireTenantAccess(partner.getTenant().getId());
+        requireTenantAccess(partner.getTenant());
 
         if (partner.getPhotoKey() != null) {
             storageApi.delete(partner.getPhotoKey());
@@ -192,7 +193,7 @@ class TenantService {
     TenantDtos.PartnerResponse uploadPartnerPhoto(UUID partnerId, MultipartFile file) {
         accessApi.requireWrite(EntityType.PARTNER);
         Partner partner = getPartnerOrThrow(partnerId);
-        requireTenantAccess(partner.getTenant().getId());
+        requireTenantAccess(partner.getTenant());
 
         ImageUploadValidator.validate(file);
 
@@ -214,27 +215,13 @@ class TenantService {
     TenantDtos.PartnerResponse removePartnerPhoto(UUID partnerId) {
         accessApi.requireWrite(EntityType.PARTNER);
         Partner partner = getPartnerOrThrow(partnerId);
-        requireTenantAccess(partner.getTenant().getId());
+        requireTenantAccess(partner.getTenant());
 
         if (partner.getPhotoKey() != null) {
             storageApi.delete(partner.getPhotoKey());
             partner.removePhoto();
         }
         return toPartnerResponse(partner);
-    }
-
-    private List<Tenant> filterAccessible(List<Tenant> tenants) {
-        if (accessApi.isUnrestricted()) {
-            return tenants;
-        }
-        List<UUID> accessibleIds = accessApi.accessibleTenantIds();
-        return tenants.stream().filter(t -> accessibleIds.contains(t.getId())).toList();
-    }
-
-    private void requireTenantAccess(UUID tenantId) {
-        if (!accessApi.canAccessTenant(tenantId)) {
-            throw new AccessDeniedException("Kein Zugriff auf diesen Mandanten.");
-        }
     }
 
     private Tenant getTenantOrThrow(UUID id) {
@@ -259,6 +246,30 @@ class TenantService {
                 ? storageApi.presignedUrl(partner.getPhotoKey(), Duration.ofMinutes(30))
                 : null;
         return TenantMapper.toPartnerResponse(partner, photoUrl);
+    }
+
+    private List<Tenant> filterAccessible(List<Tenant> tenants) {
+        if (accessApi.isUnrestricted()) {
+            return tenants;
+        }
+        List<UUID> accessibleIds = accessApi.accessibleTenantIds();
+        return tenants.stream()
+                .filter(t -> accessibleIds.contains(t.getId()) || isSelfCreated(t.getCreatedBy()))
+                .toList();
+    }
+
+    private void requireTenantAccess(Tenant tenant) {
+        boolean allowed = accessApi.isUnrestricted()
+                || accessApi.canAccessTenant(tenant.getId())
+                || isSelfCreated(tenant.getCreatedBy());
+        if (!allowed) {
+            throw new AccessDeniedException("Kein Zugriff auf diesen Mandanten.");
+        }
+    }
+
+    private boolean isSelfCreated(String createdBy) {
+        String me = accessApi.currentUserEmail();
+        return createdBy != null && createdBy.equalsIgnoreCase(me);
     }
 
 }

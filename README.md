@@ -5,8 +5,8 @@
 - cors-config (crm domain)
 - environments (frontend + backend)
 - access module
-  - default role = actual role when change
   - role access to pages where you should not see (website...)
+  - helix user db entry (with admin role)
 - dev client aws-cognito
 - email employee
   - template change (with login link)

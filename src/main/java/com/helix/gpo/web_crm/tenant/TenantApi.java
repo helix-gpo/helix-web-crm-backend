@@ -11,4 +11,6 @@ public interface TenantApi {
 
     Optional<PartnerSummary> findPartnerSummaryById(UUID partnerId);
 
+    Optional<String> findCreatedBy(UUID tenantId);
+
 }

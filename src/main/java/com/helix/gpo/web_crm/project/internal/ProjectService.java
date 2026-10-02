@@ -36,6 +36,7 @@ class ProjectService {
         if (!tenantApi.existsAndIsActive(request.tenantId())) {
             throw new IllegalStateException("Tenant is not active or does not exist: " + request.tenantId());
         }
+        requireTenantAccessForCreation(request.tenantId());
 
         Project project = Project.builder()
                 .tenantId(request.tenantId())
@@ -58,7 +59,7 @@ class ProjectService {
     ProjectDtos.ProjectResponse findById(UUID id) {
         accessApi.requireRead(EntityType.PROJECT);
         Project project = getProjectOrThrow(id);
-        requireProjectAccess(project.getId());
+        requireProjectAccess(project);
         return toResponse(project);
     }
 
@@ -81,7 +82,7 @@ class ProjectService {
     ProjectDtos.ProjectResponse changeStatus(UUID id, ProjectDtos.ChangeStatusRequest request) {
         accessApi.requireWrite(EntityType.PROJECT);
         Project project = getProjectOrThrow(id);
-        requireProjectAccess(project.getId());
+        requireProjectAccess(project);
 
         project.changeStatus(request.status());
         return toResponse(project);
@@ -90,7 +91,7 @@ class ProjectService {
     ProjectDtos.ProjectResponse publishOnWebsite(UUID id) {
         accessApi.requireWrite(EntityType.PROJECT);
         Project project = getProjectOrThrow(id);
-        requireProjectAccess(project.getId());
+        requireProjectAccess(project);
 
         if (!project.isVisibleOnWebsite() && projectRepository.countByVisibleOnWebsiteTrue() >= MAX_VISIBLE_ON_WEBSITE) {
             throw new IllegalStateException(
@@ -104,7 +105,7 @@ class ProjectService {
     ProjectDtos.ProjectResponse unpublishFromWebsite(UUID id) {
         accessApi.requireWrite(EntityType.PROJECT);
         Project project = getProjectOrThrow(id);
-        requireProjectAccess(project.getId());
+        requireProjectAccess(project);
 
         project.unpublishFromWebsite();
         return toResponse(project);
@@ -113,7 +114,7 @@ class ProjectService {
     ProjectDtos.ProjectResponse update(UUID id, ProjectDtos.UpdateProjectRequest request) {
         accessApi.requireWrite(EntityType.PROJECT);
         Project project = getProjectOrThrow(id);
-        requireProjectAccess(project.getId());
+        requireProjectAccess(project);
 
         project.updateDetails(
                 request.title(),
@@ -132,7 +133,7 @@ class ProjectService {
     ProjectDtos.ProjectResponse uploadImage(UUID projectId, MultipartFile file) {
         accessApi.requireWrite(EntityType.PROJECT);
         Project project = getProjectOrThrow(projectId);
-        requireProjectAccess(project.getId());
+        requireProjectAccess(project);
 
         ImageUploadValidator.validate(file);
 
@@ -154,7 +155,7 @@ class ProjectService {
     ProjectDtos.ProjectResponse removeImage(UUID projectId) {
         accessApi.requireWrite(EntityType.PROJECT);
         Project project = getProjectOrThrow(projectId);
-        requireProjectAccess(project.getId());
+        requireProjectAccess(project);
 
         if (project.getImageKey() != null) {
             storageApi.delete(project.getImageKey());
@@ -166,7 +167,7 @@ class ProjectService {
     ProjectDtos.ProjectResponse updateNotes(UUID id, ProjectDtos.UpdateProjectNotesRequest request) {
         accessApi.requireWrite(EntityType.PROJECT);
         Project project = getProjectOrThrow(id);
-        requireProjectAccess(project.getId());
+        requireProjectAccess(project);
 
         project.updateNotes(request.notes());
         return toResponse(project);
@@ -175,7 +176,7 @@ class ProjectService {
     ProjectDtos.MilestoneResponse addMilestone(UUID projectId, ProjectDtos.AddMilestoneRequest request) {
         accessApi.requireWrite(EntityType.MILESTONE);
         Project project = getProjectOrThrow(projectId);
-        requireProjectAccess(project.getId());
+        requireProjectAccess(project);
 
         Milestone milestone = project.addMilestone(
                 request.title(),
@@ -190,7 +191,7 @@ class ProjectService {
     ProjectDtos.MilestoneResponse updateMilestone(UUID milestoneId, ProjectDtos.UpdateMilestoneRequest request) {
         accessApi.requireWrite(EntityType.MILESTONE);
         Milestone milestone = getMilestoneOrThrow(milestoneId);
-        requireProjectAccess(milestone.getProject().getId());
+        requireProjectAccess(milestone.getProject());
 
         milestone.updateDetails(request.title(), request.description(), request.dueDate(), request.price(), request.status());
         return ProjectMapper.toMilestoneResponse(milestone);
@@ -199,7 +200,7 @@ class ProjectService {
     ProjectDtos.MilestoneResponse changeMilestoneStatus(UUID milestoneId, ProjectDtos.ChangeMilestoneStatusRequest request) {
         accessApi.requireWrite(EntityType.MILESTONE);
         Milestone milestone = getMilestoneOrThrow(milestoneId);
-        requireProjectAccess(milestone.getProject().getId());
+        requireProjectAccess(milestone.getProject());
 
         milestone.changeStatus(request.status());
         return ProjectMapper.toMilestoneResponse(milestone);
@@ -208,21 +209,16 @@ class ProjectService {
     void removeMilestone(UUID milestoneId) {
         accessApi.requireDelete(EntityType.MILESTONE);
         Milestone milestone = getMilestoneOrThrow(milestoneId);
-        requireProjectAccess(milestone.getProject().getId());
+        requireProjectAccess(milestone.getProject());
 
         milestoneRepository.delete(milestone);
     }
 
-    private List<Project> filterAccessible(List<Project> projects) {
-        if (accessApi.isUnrestricted()) {
-            return projects;
-        }
-        List<UUID> accessibleIds = accessApi.accessibleProjectIds();
-        return projects.stream().filter(p -> accessibleIds.contains(p.getId())).toList();
-    }
-
-    private void requireProjectAccess(UUID projectId) {
-        if (!accessApi.canAccessProject(projectId)) {
+    private void requireProjectAccess(Project project) {
+        boolean allowed = accessApi.isUnrestricted()
+                || accessApi.canAccessProject(project.getId())
+                || isSelfCreated(project.getCreatedBy());
+        if (!allowed) {
             throw new AccessDeniedException("Kein Zugriff auf dieses Projekt.");
         }
     }
@@ -242,6 +238,34 @@ class ProjectService {
                 ? storageApi.presignedUrl(project.getImageKey(), Duration.ofMinutes(30))
                 : null;
         return ProjectMapper.toResponse(project, imageUrl);
+    }
+
+    private List<Project> filterAccessible(List<Project> projects) {
+        if (accessApi.isUnrestricted()) {
+            return projects;
+        }
+        List<UUID> accessibleIds = accessApi.accessibleProjectIds();
+        return projects.stream()
+                .filter(p -> accessibleIds.contains(p.getId()) || isSelfCreated(p.getCreatedBy()))
+                .toList();
+    }
+
+    private void requireTenantAccessForCreation(UUID tenantId) {
+        if (accessApi.isUnrestricted()) {
+            return;
+        }
+        boolean assigned = accessApi.accessibleTenantIds().contains(tenantId);
+        boolean selfCreated = tenantApi.findCreatedBy(tenantId)
+                .map(this::isSelfCreated)
+                .orElse(false);
+        if (!assigned && !selfCreated) {
+            throw new AccessDeniedException("Kein Zugriff auf diesen Mandanten.");
+        }
+    }
+
+    private boolean isSelfCreated(String createdBy) {
+        String me = accessApi.currentUserEmail();
+        return createdBy != null && createdBy.equalsIgnoreCase(me);
     }
 
 }

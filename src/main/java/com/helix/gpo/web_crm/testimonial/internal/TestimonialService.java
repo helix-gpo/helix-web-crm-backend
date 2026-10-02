@@ -1,13 +1,16 @@
 package com.helix.gpo.web_crm.testimonial.internal;
 
+import com.helix.gpo.web_crm.access.AccessApi;
+import com.helix.gpo.web_crm.access.EntityType;
 import com.helix.gpo.web_crm.notification.EmailMessage;
 import com.helix.gpo.web_crm.notification.NotificationApi;
-import com.helix.gpo.web_crm.testimonial.internal.config.WebsiteProperties;
-import com.helix.gpo.web_crm.testimonial.internal.dto.TestimonialDtos.*;
 import com.helix.gpo.web_crm.tenant.PartnerSummary;
 import com.helix.gpo.web_crm.tenant.TenantApi;
+import com.helix.gpo.web_crm.testimonial.internal.config.WebsiteProperties;
+import com.helix.gpo.web_crm.testimonial.internal.dto.TestimonialDtos.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +21,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 class TestimonialService {
 
     private static final int DEFAULT_EXPIRY_DAYS = 30;
@@ -29,13 +31,18 @@ class TestimonialService {
 
     private final TenantApi tenantApi;
     private final NotificationApi notificationApi;
+    private final AccessApi accessApi;
 
     private final TokenGenerator tokenGenerator;
     private final WebsiteProperties websiteProperties;
 
     InvitationResponse createInvitation(CreateInvitationRequest request) {
+        accessApi.requireWrite(EntityType.TESTIMONIAL);
+
         PartnerSummary partner = tenantApi.findPartnerSummaryById(request.partnerId())
                 .orElseThrow(() -> new EntityNotFoundException("Dieser Ansprechpartner wurde nicht gefunden."));
+
+        requireScopeAccess(partner.tenantId(), request.projectId());
 
         String rawToken = tokenGenerator.generateRawToken();
         int expiryDays = request.expiresInDays() != null ? request.expiresInDays() : DEFAULT_EXPIRY_DAYS;
@@ -71,11 +78,15 @@ class TestimonialService {
 
     @Transactional(readOnly = true)
     List<InvitationSummaryResponse> findInvitationsByTenant(UUID tenantId) {
+        accessApi.requireRead(EntityType.TESTIMONIAL);
+        requireTenantAccess(tenantId);
+
         return invitationRepository.findAllByTenantIdOrderByCreatedAtDesc(tenantId).stream()
                 .map(TestimonialMapper::toSummaryResponse)
                 .toList();
     }
 
+    // public api for website - no access check, token-based instead
     TestimonialResponse submit(SubmitTestimonialRequest request) {
         String tokenHash = tokenGenerator.hash(request.token());
 
@@ -107,19 +118,27 @@ class TestimonialService {
     }
 
     TestimonialResponse approve(UUID id) {
+        accessApi.requireWrite(EntityType.TESTIMONIAL);
         Testimonial testimonial = getOrThrow(id);
+        requireTestimonialAccess(testimonial);
+
         testimonial.approve();
         return toResponse(testimonial);
     }
 
     TestimonialResponse reject(UUID id) {
+        accessApi.requireWrite(EntityType.TESTIMONIAL);
         Testimonial testimonial = getOrThrow(id);
+        requireTestimonialAccess(testimonial);
+
         testimonial.reject();
         return toResponse(testimonial);
     }
 
     TestimonialResponse publish(UUID id) {
+        accessApi.requireWrite(EntityType.TESTIMONIAL);
         Testimonial testimonial = getOrThrow(id);
+        requireTestimonialAccess(testimonial);
 
         if (testimonial.getStatus() != TestimonialStatus.APPROVED) {
             throw new IllegalStateException(
@@ -136,25 +155,31 @@ class TestimonialService {
     }
 
     TestimonialResponse unpublish(UUID id) {
+        accessApi.requireWrite(EntityType.TESTIMONIAL);
         Testimonial testimonial = getOrThrow(id);
+        requireTestimonialAccess(testimonial);
+
         testimonial.unpublish();
         return toResponse(testimonial);
     }
 
     @Transactional(readOnly = true)
     List<TestimonialResponse> findAll() {
-        return testimonialRepository.findAll().stream()
+        accessApi.requireRead(EntityType.TESTIMONIAL);
+        return filterAccessible(testimonialRepository.findAll()).stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     List<TestimonialResponse> findAllByTenant(UUID tenantId) {
-        return testimonialRepository.findAllByTenantId(tenantId).stream()
+        accessApi.requireRead(EntityType.TESTIMONIAL);
+        return filterAccessible(testimonialRepository.findAllByTenantId(tenantId)).stream()
                 .map(this::toResponse)
                 .toList();
     }
 
+    // public api for website - no access check
     @Transactional(readOnly = true)
     List<TestimonialResponse> findAllVisibleOnWebsite() {
         return testimonialRepository.findAllByVisibleOnWebsiteTrueOrderByCreatedAtDesc().stream()
@@ -190,9 +215,43 @@ class TestimonialService {
     }
 
     void revokeInvitation(UUID invitationId) {
+        accessApi.requireWrite(EntityType.TESTIMONIAL);
         TestimonialInvitation invitation = invitationRepository.findById(invitationId)
                 .orElseThrow(() -> new EntityNotFoundException("Diese Einladung wurde nicht gefunden."));
+        requireScopeAccess(invitation.getTenantId(), invitation.getProjectId());
+
         invitation.revoke();
+    }
+
+    private List<Testimonial> filterAccessible(List<Testimonial> testimonials) {
+        if (accessApi.isUnrestricted()) {
+            return testimonials;
+        }
+        List<UUID> accessibleProjects = accessApi.accessibleProjectIds();
+        List<UUID> accessibleTenants = accessApi.accessibleTenantIds();
+        return testimonials.stream()
+                .filter(t -> t.getProjectId() != null
+                        ? accessibleProjects.contains(t.getProjectId())
+                        : accessibleTenants.contains(t.getTenantId()))
+                .toList();
+    }
+
+    private void requireTestimonialAccess(Testimonial testimonial) {
+        requireScopeAccess(testimonial.getTenantId(), testimonial.getProjectId());
+    }
+
+    private void requireTenantAccess(UUID tenantId) {
+        if (!accessApi.canAccessTenant(tenantId)) {
+            throw new AccessDeniedException("Kein Zugriff auf diesen Mandanten.");
+        }
+    }
+
+    private void requireScopeAccess(UUID tenantId, UUID projectId) {
+        boolean allowed = accessApi.isUnrestricted()
+                || (projectId != null ? accessApi.canAccessProject(projectId) : accessApi.canAccessTenant(tenantId));
+        if (!allowed) {
+            throw new AccessDeniedException("Kein Zugriff auf diesen Mandanten oder dieses Projekt.");
+        }
     }
 
 }

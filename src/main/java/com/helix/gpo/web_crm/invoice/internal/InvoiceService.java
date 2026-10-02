@@ -1,5 +1,7 @@
 package com.helix.gpo.web_crm.invoice.internal;
 
+import com.helix.gpo.web_crm.access.AccessApi;
+import com.helix.gpo.web_crm.access.EntityType;
 import com.helix.gpo.web_crm.invoice.internal.config.CompanyBillingProperties;
 import com.helix.gpo.web_crm.invoice.internal.dto.InvoiceDtos;
 import com.helix.gpo.web_crm.invoice.internal.dto.InvoiceDtos.*;
@@ -14,6 +16,7 @@ import com.helix.gpo.web_crm.tenant.TenantApi;
 import com.helix.gpo.web_crm.tenant.TenantBillingDetails;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +30,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 class InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
@@ -37,12 +39,16 @@ class InvoiceService {
     private final ProjectApi projectApi;
     private final StorageApi storageApi;
     private final NotificationApi notificationApi;
+    private final AccessApi accessApi;
 
     private final InvoiceNumberGenerator invoiceNumberGenerator;
     private final CompanyBillingProperties companyBillingProperties;
     private final InvoicePdfService invoicePdfService;
 
     InvoiceResponse create(CreateInvoiceRequest request) {
+        accessApi.requireWrite(EntityType.INVOICE);
+        requireScopeAccess(request.tenantId(), request.projectId());
+
         TenantBillingDetails tenant = tenantApi.findBillingDetailsById(request.tenantId())
                 .orElseThrow(() -> new EntityNotFoundException("Dieser Mandant wurde nicht gefunden."));
 
@@ -73,19 +79,27 @@ class InvoiceService {
     }
 
     InvoiceResponse addLineItem(UUID invoiceId, LineItemRequest request) {
+        accessApi.requireWrite(EntityType.INVOICE);
         Invoice invoice = getInvoiceOrThrow(invoiceId);
+        requireInvoiceAccess(invoice);
+
         appendLineItem(invoice, request);
         return InvoiceMapper.toResponse(invoiceRepository.save(invoice));
     }
 
     InvoiceResponse removeLineItem(UUID invoiceId, UUID lineItemId) {
+        accessApi.requireWrite(EntityType.INVOICE);
         Invoice invoice = getInvoiceOrThrow(invoiceId);
+        requireInvoiceAccess(invoice);
+
         invoice.removeLineItem(lineItemId);
         return InvoiceMapper.toResponse(invoice);
     }
 
     InvoiceResponse issue(UUID invoiceId, IssueInvoiceRequest request) {
+        accessApi.requireWrite(EntityType.INVOICE);
         Invoice invoice = getInvoiceOrThrow(invoiceId);
+        requireInvoiceAccess(invoice);
 
         TenantBillingDetails tenant = tenantApi.findBillingDetailsById(invoice.getTenantId())
                 .orElseThrow(() -> new EntityNotFoundException("Dieser Mandant wurde nicht gefunden."));
@@ -120,7 +134,10 @@ class InvoiceService {
     }
 
     InvoiceResponse send(UUID invoiceId, SendInvoiceRequest request) {
+        accessApi.requireWrite(EntityType.INVOICE);
         Invoice invoice = getInvoiceOrThrow(invoiceId);
+        requireInvoiceAccess(invoice);
+
         String targetEmail = resolveTargetEmail(invoice, request != null ? request.email() : null);
 
         byte[] pdf = invoicePdfService.render(invoice);
@@ -131,7 +148,10 @@ class InvoiceService {
     }
 
     InvoiceResponse markPaid(UUID invoiceId, MarkPaidRequest request) {
+        accessApi.requireWrite(EntityType.INVOICE);
         Invoice invoice = getInvoiceOrThrow(invoiceId);
+        requireInvoiceAccess(invoice);
+
         LocalDate paidDate = request != null && request.paidDate() != null ? request.paidDate() : LocalDate.now();
         invoice.markPaid(paidDate);
         return InvoiceMapper.toResponse(invoiceRepository.save(invoice));
@@ -168,7 +188,10 @@ class InvoiceService {
     }
 
     String getDocumentUrl(UUID invoiceId) {
+        accessApi.requireRead(EntityType.INVOICE);
         Invoice invoice = getInvoiceOrThrow(invoiceId);
+        requireInvoiceAccess(invoice);
+
         if (invoice.getDocumentKey() == null) {
             throw new IllegalStateException("Für diese Rechnung existiert noch kein Dokument: " + invoiceId);
         }
@@ -177,7 +200,9 @@ class InvoiceService {
 
     @Transactional(readOnly = true)
     InvoiceResponse findById(UUID id) {
+        accessApi.requireRead(EntityType.INVOICE);
         Invoice invoice = getInvoiceOrThrow(id);
+        requireInvoiceAccess(invoice);
 
         if (invoice.getStatus() != InvoiceStatus.DRAFT) {
             return InvoiceMapper.toResponse(invoice);
@@ -195,20 +220,25 @@ class InvoiceService {
 
     @Transactional(readOnly = true)
     List<InvoiceResponse> findAll() {
-        return invoiceRepository.findAll().stream()
+        accessApi.requireRead(EntityType.INVOICE);
+        return filterAccessible(invoiceRepository.findAll()).stream()
                 .map(InvoiceMapper::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     List<InvoiceResponse> findAllByTenant(UUID tenantId) {
-        return invoiceRepository.findAllByTenantId(tenantId).stream()
+        accessApi.requireRead(EntityType.INVOICE);
+        return filterAccessible(invoiceRepository.findAllByTenantId(tenantId)).stream()
                 .map(InvoiceMapper::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     InvoicePrefillResponse prefill(UUID tenantId, UUID projectId) {
+        accessApi.requireWrite(EntityType.INVOICE);
+        requireScopeAccess(tenantId, projectId);
+
         TenantBillingDetails tenant = tenantApi.findBillingDetailsById(tenantId)
                 .orElseThrow(() -> new EntityNotFoundException("Dieser Mandant wurde nicht gefunden."));
 
@@ -298,7 +328,6 @@ class InvoiceService {
         }
     }
 
-
     private void appendLineItem(Invoice invoice, LineItemRequest request) {
         switch (request.source()) {
             case MILESTONE -> {
@@ -347,13 +376,19 @@ class InvoiceService {
     }
 
     InvoiceResponse updateHeader(UUID invoiceId, UpdateInvoiceHeaderRequest request) {
+        accessApi.requireWrite(EntityType.INVOICE);
         Invoice invoice = getInvoiceOrThrow(invoiceId);
+        requireInvoiceAccess(invoice);
+
         invoice.updateHeader(request.buyerReference(), request.paymentTermsDays());
         return InvoiceMapper.toResponse(invoiceRepository.save(invoice));
     }
 
     InvoiceResponse updateLineItem(UUID invoiceId, UUID lineItemId, UpdateLineItemRequest request) {
+        accessApi.requireWrite(EntityType.INVOICE);
         Invoice invoice = getInvoiceOrThrow(invoiceId);
+        requireInvoiceAccess(invoice);
+
         invoice.updateLineItem(
                 lineItemId,
                 request.description(),
@@ -366,11 +401,39 @@ class InvoiceService {
     }
 
     void delete(UUID invoiceId) {
+        accessApi.requireDelete(EntityType.INVOICE);
         Invoice invoice = getInvoiceOrThrow(invoiceId);
+        requireInvoiceAccess(invoice);
+
         if (invoice.getStatus() != InvoiceStatus.DRAFT) {
             throw new IllegalStateException("Nur Entwürfe können gelöscht werden.");
         }
         invoiceRepository.delete(invoice);
+    }
+
+    private List<Invoice> filterAccessible(List<Invoice> invoices) {
+        if (accessApi.isUnrestricted()) {
+            return invoices;
+        }
+        List<UUID> accessibleProjects = accessApi.accessibleProjectIds();
+        List<UUID> accessibleTenants = accessApi.accessibleTenantIds();
+        return invoices.stream()
+                .filter(i -> i.getProjectId() != null
+                        ? accessibleProjects.contains(i.getProjectId())
+                        : accessibleTenants.contains(i.getTenantId()))
+                .toList();
+    }
+
+    private void requireInvoiceAccess(Invoice invoice) {
+        requireScopeAccess(invoice.getTenantId(), invoice.getProjectId());
+    }
+
+    private void requireScopeAccess(UUID tenantId, UUID projectId) {
+        boolean allowed = accessApi.isUnrestricted()
+                || (projectId != null ? accessApi.canAccessProject(projectId) : accessApi.canAccessTenant(tenantId));
+        if (!allowed) {
+            throw new AccessDeniedException("Kein Zugriff auf diesen Mandanten oder dieses Projekt.");
+        }
     }
 
 }

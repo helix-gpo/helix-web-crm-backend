@@ -71,6 +71,7 @@ public final class ProjectDtos {
             String imageUrl,
             String notes,
             List<MilestoneResponse> milestones,
+            String createdBy,
             Instant createdAt,
             Instant updatedAt
     ) {

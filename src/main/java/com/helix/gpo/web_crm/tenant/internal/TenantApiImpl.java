@@ -42,4 +42,9 @@ class TenantApiImpl implements TenantApi {
         });
     }
 
+    @Override
+    public Optional<String> findCreatedBy(UUID tenantId) {
+        return tenantRepository.findById(tenantId).map(Tenant::getCreatedBy);
+    }
+
 }

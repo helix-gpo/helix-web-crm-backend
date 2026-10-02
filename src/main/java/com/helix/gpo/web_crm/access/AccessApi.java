@@ -27,4 +27,6 @@ public interface AccessApi {
 
     boolean canAccessTenant(UUID tenantId);
 
+    String currentUserEmail();
+
 }

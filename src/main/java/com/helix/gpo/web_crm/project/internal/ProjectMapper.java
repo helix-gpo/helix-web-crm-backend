@@ -34,6 +34,7 @@ final class ProjectMapper {
                 project.getMilestones().stream()
                         .map(ProjectMapper::toMilestoneResponse)
                         .toList(),
+                project.getCreatedBy(),
                 project.getCreatedAt(),
                 project.getUpdatedAt()
         );
