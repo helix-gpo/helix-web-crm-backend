@@ -51,6 +51,11 @@ public final class AccessDtos {
     ) {
     }
 
+    public record AssignProjectRequest(
+            @NotNull UUID tenantId
+    ) {
+    }
+
     // responses
     public record RoleResponse(
             UUID id,

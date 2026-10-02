@@ -1,6 +1,5 @@
-// tenant/package-info.java
 @org.springframework.modulith.ApplicationModule(
         displayName = "Tenant Management",
-        allowedDependencies = {"storage"}
+        allowedDependencies = {"storage", "access"}
 )
 package com.helix.gpo.web_crm.tenant;

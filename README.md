@@ -5,6 +5,8 @@
 - cors-config (crm domain)
 - environments (frontend + backend)
 - access module
+  - default role = actual role when change
+  - role access to pages where you should not see (website...)
 - dev client aws-cognito
 - email employee
   - template change (with login link)
@@ -16,3 +18,4 @@
   - invoices we need to pay (inbox)
 - account details for consulting (with timeline)
 - team on website
+- vpn (network and firewall rules for crm access)

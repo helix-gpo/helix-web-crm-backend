@@ -3,8 +3,6 @@ package com.helix.gpo.web_crm.access.internal;
 import com.helix.gpo.web_crm.access.AccessApi;
 import com.helix.gpo.web_crm.access.EntityType;
 import com.helix.gpo.web_crm.access.PermissionAction;
-import com.helix.gpo.web_crm.project.ProjectApi;
-import com.helix.gpo.web_crm.project.ProjectSummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,11 +21,10 @@ class AccessApiImpl implements AccessApi {
 
     private final EmployeeRepository employeeRepository;
     private final EmployeeProjectAssignmentRepository assignmentRepository;
-    private final ProjectApi projectApi;
 
     @Override
     public boolean isUnrestricted() {
-        return currentEmployee().map(e -> e.getRole().isUnrestricted()).orElse(false);
+        return currentEmployee().map(e -> e.getRole().isUnrestricted()).orElse(true);
     }
 
     @Override
@@ -71,12 +68,12 @@ class AccessApiImpl implements AccessApi {
 
     @Override
     public List<UUID> accessibleTenantIds() {
-        return accessibleProjectIds().stream()
-                .map(projectApi::findSummaryById)
-                .flatMap(Optional::stream)
-                .map(ProjectSummary::tenantId)
-                .distinct()
-                .toList();
+        return currentEmployee()
+                .map(e -> assignmentRepository.findAllByEmployeeId(e.getId()).stream()
+                        .map(EmployeeProjectAssignment::getTenantId)
+                        .distinct()
+                        .toList())
+                .orElse(List.of());
     }
 
     @Override

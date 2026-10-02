@@ -1,11 +1,14 @@
 package com.helix.gpo.web_crm.project.internal;
 
-import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos.*;
+import com.helix.gpo.web_crm.access.AccessApi;
+import com.helix.gpo.web_crm.access.EntityType;
+import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos;
 import com.helix.gpo.web_crm.shared.ImageUploadValidator;
 import com.helix.gpo.web_crm.storage.StorageApi;
 import com.helix.gpo.web_crm.tenant.TenantApi;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,7 +20,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 class ProjectService {
 
     private static final int MAX_VISIBLE_ON_WEBSITE = 6;
@@ -26,8 +28,11 @@ class ProjectService {
     private final MilestoneRepository milestoneRepository;
     private final TenantApi tenantApi;
     private final StorageApi storageApi;
+    private final AccessApi accessApi;
 
-    ProjectResponse create(CreateProjectRequest request) {
+    ProjectDtos.ProjectResponse create(ProjectDtos.CreateProjectRequest request) {
+        accessApi.requireWrite(EntityType.PROJECT);
+
         if (!tenantApi.existsAndIsActive(request.tenantId())) {
             throw new IllegalStateException("Tenant is not active or does not exist: " + request.tenantId());
         }
@@ -50,32 +55,42 @@ class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    ProjectResponse findById(UUID id) {
-        return toResponse(getProjectOrThrow(id));
-    }
-
-    @Transactional(readOnly = true)
-    List<ProjectResponse> findAll() {
-        return projectRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    List<ProjectResponse> findAllByTenant(UUID tenantId) {
-        return projectRepository.findAllByTenantId(tenantId).stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
-    ProjectResponse changeStatus(UUID id, ChangeStatusRequest request) {
+    ProjectDtos.ProjectResponse findById(UUID id) {
+        accessApi.requireRead(EntityType.PROJECT);
         Project project = getProjectOrThrow(id);
+        requireProjectAccess(project.getId());
+        return toResponse(project);
+    }
+
+    @Transactional(readOnly = true)
+    List<ProjectDtos.ProjectResponse> findAll() {
+        accessApi.requireRead(EntityType.PROJECT);
+        return filterAccessible(projectRepository.findAll()).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    List<ProjectDtos.ProjectResponse> findAllByTenant(UUID tenantId) {
+        accessApi.requireRead(EntityType.PROJECT);
+        return filterAccessible(projectRepository.findAllByTenantId(tenantId)).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    ProjectDtos.ProjectResponse changeStatus(UUID id, ProjectDtos.ChangeStatusRequest request) {
+        accessApi.requireWrite(EntityType.PROJECT);
+        Project project = getProjectOrThrow(id);
+        requireProjectAccess(project.getId());
+
         project.changeStatus(request.status());
         return toResponse(project);
     }
 
-    ProjectResponse publishOnWebsite(UUID id) {
+    ProjectDtos.ProjectResponse publishOnWebsite(UUID id) {
+        accessApi.requireWrite(EntityType.PROJECT);
         Project project = getProjectOrThrow(id);
+        requireProjectAccess(project.getId());
 
         if (!project.isVisibleOnWebsite() && projectRepository.countByVisibleOnWebsiteTrue() >= MAX_VISIBLE_ON_WEBSITE) {
             throw new IllegalStateException(
@@ -86,14 +101,20 @@ class ProjectService {
         return toResponse(project);
     }
 
-    ProjectResponse unpublishFromWebsite(UUID id) {
+    ProjectDtos.ProjectResponse unpublishFromWebsite(UUID id) {
+        accessApi.requireWrite(EntityType.PROJECT);
         Project project = getProjectOrThrow(id);
+        requireProjectAccess(project.getId());
+
         project.unpublishFromWebsite();
         return toResponse(project);
     }
 
-    ProjectResponse update(UUID id, UpdateProjectRequest request) {
+    ProjectDtos.ProjectResponse update(UUID id, ProjectDtos.UpdateProjectRequest request) {
+        accessApi.requireWrite(EntityType.PROJECT);
         Project project = getProjectOrThrow(id);
+        requireProjectAccess(project.getId());
+
         project.updateDetails(
                 request.title(),
                 request.description(),
@@ -108,8 +129,11 @@ class ProjectService {
         return toResponse(project);
     }
 
-    ProjectResponse uploadImage(UUID projectId, MultipartFile file) {
+    ProjectDtos.ProjectResponse uploadImage(UUID projectId, MultipartFile file) {
+        accessApi.requireWrite(EntityType.PROJECT);
         Project project = getProjectOrThrow(projectId);
+        requireProjectAccess(project.getId());
+
         ImageUploadValidator.validate(file);
 
         if (project.getImageKey() != null) {
@@ -127,8 +151,11 @@ class ProjectService {
         return toResponse(project);
     }
 
-    ProjectResponse removeImage(UUID projectId) {
+    ProjectDtos.ProjectResponse removeImage(UUID projectId) {
+        accessApi.requireWrite(EntityType.PROJECT);
         Project project = getProjectOrThrow(projectId);
+        requireProjectAccess(project.getId());
+
         if (project.getImageKey() != null) {
             storageApi.delete(project.getImageKey());
             project.removeImage();
@@ -136,14 +163,20 @@ class ProjectService {
         return toResponse(project);
     }
 
-    ProjectResponse updateNotes(UUID id, UpdateProjectNotesRequest request) {
+    ProjectDtos.ProjectResponse updateNotes(UUID id, ProjectDtos.UpdateProjectNotesRequest request) {
+        accessApi.requireWrite(EntityType.PROJECT);
         Project project = getProjectOrThrow(id);
+        requireProjectAccess(project.getId());
+
         project.updateNotes(request.notes());
         return toResponse(project);
     }
 
-    MilestoneResponse addMilestone(UUID projectId, AddMilestoneRequest request) {
+    ProjectDtos.MilestoneResponse addMilestone(UUID projectId, ProjectDtos.AddMilestoneRequest request) {
+        accessApi.requireWrite(EntityType.MILESTONE);
         Project project = getProjectOrThrow(projectId);
+        requireProjectAccess(project.getId());
+
         Milestone milestone = project.addMilestone(
                 request.title(),
                 request.description(),
@@ -154,28 +187,49 @@ class ProjectService {
         return ProjectMapper.toMilestoneResponse(milestone);
     }
 
-    private Project getProjectOrThrow(UUID id) {
-        return projectRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Dieses Projekt wurde nicht gefunden."));
-    }
-
-    MilestoneResponse updateMilestone(UUID milestoneId, UpdateMilestoneRequest request) {
+    ProjectDtos.MilestoneResponse updateMilestone(UUID milestoneId, ProjectDtos.UpdateMilestoneRequest request) {
+        accessApi.requireWrite(EntityType.MILESTONE);
         Milestone milestone = getMilestoneOrThrow(milestoneId);
+        requireProjectAccess(milestone.getProject().getId());
+
         milestone.updateDetails(request.title(), request.description(), request.dueDate(), request.price(), request.status());
         return ProjectMapper.toMilestoneResponse(milestone);
     }
 
-    MilestoneResponse changeMilestoneStatus(UUID milestoneId, ChangeMilestoneStatusRequest request) {
+    ProjectDtos.MilestoneResponse changeMilestoneStatus(UUID milestoneId, ProjectDtos.ChangeMilestoneStatusRequest request) {
+        accessApi.requireWrite(EntityType.MILESTONE);
         Milestone milestone = getMilestoneOrThrow(milestoneId);
+        requireProjectAccess(milestone.getProject().getId());
+
         milestone.changeStatus(request.status());
         return ProjectMapper.toMilestoneResponse(milestone);
     }
 
     void removeMilestone(UUID milestoneId) {
-        if (!milestoneRepository.existsById(milestoneId)) {
-            throw new EntityNotFoundException("Dieser Meilenstein wurde nicht gefunden.");
+        accessApi.requireDelete(EntityType.MILESTONE);
+        Milestone milestone = getMilestoneOrThrow(milestoneId);
+        requireProjectAccess(milestone.getProject().getId());
+
+        milestoneRepository.delete(milestone);
+    }
+
+    private List<Project> filterAccessible(List<Project> projects) {
+        if (accessApi.isUnrestricted()) {
+            return projects;
         }
-        milestoneRepository.deleteById(milestoneId);
+        List<UUID> accessibleIds = accessApi.accessibleProjectIds();
+        return projects.stream().filter(p -> accessibleIds.contains(p.getId())).toList();
+    }
+
+    private void requireProjectAccess(UUID projectId) {
+        if (!accessApi.canAccessProject(projectId)) {
+            throw new AccessDeniedException("Kein Zugriff auf dieses Projekt.");
+        }
+    }
+
+    private Project getProjectOrThrow(UUID id) {
+        return projectRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Dieses Projekt wurde nicht gefunden."));
     }
 
     private Milestone getMilestoneOrThrow(UUID id) {
@@ -183,7 +237,7 @@ class ProjectService {
                 .orElseThrow(() -> new EntityNotFoundException("Dieser Meilenstein wurde nicht gefunden."));
     }
 
-    private ProjectResponse toResponse(Project project) {
+    private ProjectDtos.ProjectResponse toResponse(Project project) {
         String imageUrl = project.getImageKey() != null
                 ? storageApi.presignedUrl(project.getImageKey(), Duration.ofMinutes(30))
                 : null;

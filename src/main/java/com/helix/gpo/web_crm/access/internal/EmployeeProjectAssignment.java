@@ -26,4 +26,7 @@ class EmployeeProjectAssignment extends BaseEntity {
     @Column(name = "project_id", nullable = false)
     private UUID projectId;
 
+    @Column(name = "tenant_id", nullable = false)
+    private UUID tenantId;
+
 }

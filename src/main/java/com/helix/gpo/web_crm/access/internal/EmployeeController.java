@@ -1,5 +1,6 @@
 package com.helix.gpo.web_crm.access.internal;
 
+import com.helix.gpo.web_crm.access.internal.dto.AccessDtos;
 import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.CreateEmployeeRequest;
 import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.EmployeeResponse;
 import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.UpdateEmployeeRoleRequest;
@@ -31,8 +32,12 @@ class EmployeeController {
     }
 
     @PostMapping("/{id}/projects/{projectId}")
-    EmployeeResponse assignProject(@PathVariable UUID id, @PathVariable UUID projectId) {
-        return employeeService.assignProject(id, projectId);
+    EmployeeResponse assignProject(
+            @PathVariable UUID id,
+            @PathVariable UUID projectId,
+            @Valid @RequestBody AccessDtos.AssignProjectRequest request
+    ) {
+        return employeeService.assignProject(id, projectId, request.tenantId());
     }
 
     @DeleteMapping("/{id}/projects/{projectId}")

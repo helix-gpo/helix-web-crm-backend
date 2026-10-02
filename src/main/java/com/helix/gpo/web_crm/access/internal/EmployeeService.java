@@ -71,12 +71,13 @@ class EmployeeService {
         return AccessMapper.toResponse(employee, assignedProjectIds(employeeId));
     }
 
-    EmployeeResponse assignProject(UUID employeeId, UUID projectId) {
+    EmployeeResponse assignProject(UUID employeeId, UUID projectId, UUID tenantId) {
         Employee employee = getOrThrow(employeeId);
         if (!assignmentRepository.existsByEmployeeIdAndProjectId(employeeId, projectId)) {
             assignmentRepository.save(EmployeeProjectAssignment.builder()
                     .employeeId(employeeId)
                     .projectId(projectId)
+                    .tenantId(tenantId)
                     .build());
         }
         return AccessMapper.toResponse(employee, assignedProjectIds(employeeId));
