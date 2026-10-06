@@ -29,4 +29,7 @@ public interface AccessApi {
 
     String currentUserEmail();
 
+    // throws AccessDeniedException unless the current user has an unrestricted role
+    void requireAdministration();
+
 }

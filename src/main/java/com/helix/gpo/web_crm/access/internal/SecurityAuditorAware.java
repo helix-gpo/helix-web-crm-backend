@@ -1,4 +1,4 @@
-package com.helix.gpo.web_crm.shared.config;
+package com.helix.gpo.web_crm.access.internal;
 
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;

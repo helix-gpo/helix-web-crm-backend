@@ -21,10 +21,11 @@ class AccessApiImpl implements AccessApi {
 
     private final EmployeeRepository employeeRepository;
     private final EmployeeProjectAssignmentRepository assignmentRepository;
+    private final CurrentUserDirectory currentUserDirectory;
 
     @Override
     public boolean isUnrestricted() {
-        return currentEmployee().map(e -> e.getRole().isUnrestricted()).orElse(true);
+        return currentEmployee().map(e -> e.getRole().isUnrestricted()).orElse(false);
     }
 
     @Override
@@ -87,9 +88,7 @@ class AccessApiImpl implements AccessApi {
     }
 
     private boolean isAllowed(EntityType entity, PermissionAction action) {
-        // no employee record (e.g. legacy accounts not yet migrated) = full access,
-        // keeps existing admins usable right after this migration ships
-        return currentEmployee().map(e -> e.getRole().allows(entity, action)).orElse(true);
+        return currentEmployee().map(e -> e.getRole().allows(entity, action)).orElse(false);
     }
 
     private void require(EntityType entity, PermissionAction action) {
@@ -101,19 +100,29 @@ class AccessApiImpl implements AccessApi {
 
     @Override
     public String currentUserEmail() {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
-            return jwt.getClaimAsString("email");
-        }
-        return null;
+        return currentSub().flatMap(currentUserDirectory::emailOf).orElse(null);
     }
 
+    // deactivated employees lose access immediately, even with a still valid token
     private Optional<Employee> currentEmployee() {
-        String email = currentUserEmail();
-        if (email == null) {
-            return Optional.empty();
+        return currentSub()
+                .flatMap(employeeRepository::findByCognitoSub)
+                .filter(Employee::isActive);
+    }
+
+    private Optional<String> currentSub() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
+            return Optional.ofNullable(jwt.getSubject());
         }
-        return employeeRepository.findByEmailIgnoreCase(email);
+        return Optional.empty();
+    }
+
+    @Override
+    public void requireAdministration() {
+        if (!isUnrestricted()) {
+            throw new AccessDeniedException("Diese Aktion ist Administratoren vorbehalten.");
+        }
     }
 
 }

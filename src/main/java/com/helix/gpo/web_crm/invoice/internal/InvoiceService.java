@@ -115,6 +115,7 @@ class InvoiceService {
         String invoiceNumber = invoiceNumberGenerator.generateNext();
 
         invoice.issue(invoiceNumber, issueDate);
+        invoice.recordIssuer(accessApi.currentUserEmail());
         invoiceRepository.save(invoice);
 
         byte[] pdf = invoicePdfService.render(invoice);

@@ -46,7 +46,9 @@ public final class AccessDtos {
     ) {
     }
 
-    public record UpdateEmployeeRoleRequest(
+    public record UpdateEmployeeRequest(
+            @NotBlank String firstName,
+            @NotBlank String lastName,
             @NotNull UUID roleId
     ) {
     }
@@ -74,6 +76,16 @@ public final class AccessDtos {
             RoleResponse role,
             boolean active,
             List<UUID> assignedProjectIds
+    ) {
+    }
+
+    public record MeResponse(
+            String email,
+            String firstName,
+            String lastName,
+            String roleName,
+            boolean unrestricted,
+            List<PermissionEntryDto> permissions
     ) {
     }
 

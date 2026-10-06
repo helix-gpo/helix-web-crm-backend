@@ -73,6 +73,7 @@ public final class ProjectDtos {
             List<MilestoneResponse> milestones,
             String createdBy,
             Instant createdAt,
+            String updatedBy,
             Instant updatedAt
     ) {
     }

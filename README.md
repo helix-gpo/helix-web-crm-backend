@@ -2,12 +2,10 @@
 - n8n-ai (website) replace with google-mcp
 
 # now:
+- java-doc + "confluence page"
 - cors-config (crm domain)
 - environments (frontend + backend)
-- access module
-  - role access to pages where you should not see (website...)
-  - helix user db entry (with admin role)
-- dev client aws-cognito
+- filter by created by etc. (more fields)
 - email employee
   - template change (with login link)
   - outsourcing (own service same as projects/references)

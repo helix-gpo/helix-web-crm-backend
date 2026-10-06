@@ -65,6 +65,17 @@ class Invoice extends BaseEntity {
     @Column(name = "paid_date")
     private LocalDate paidDate;
 
+    @Column(name = "issued_by", length = 254)
+    private String issuedBy;
+
+    @Column(name = "issued_at")
+    private Instant issuedAt;
+
+    public void recordIssuer(String issuedBy) {
+        this.issuedBy = issuedBy;
+        this.issuedAt = Instant.now();
+    }
+
     public void markSent(String sentToEmail) {
         if (this.status != InvoiceStatus.ISSUED) {
             throw new IllegalStateException(

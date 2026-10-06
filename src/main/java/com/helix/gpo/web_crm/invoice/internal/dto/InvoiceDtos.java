@@ -122,7 +122,11 @@ public final class InvoiceDtos {
             String sentToEmail,
             Instant sentAt,
             LocalDate paidDate,
+            String issuedBy,
+            Instant issuedAt,
+            String createdBy,
             Instant createdAt,
+            String updatedBy,
             Instant updatedAt
     ) {
     }

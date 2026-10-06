@@ -45,4 +45,13 @@ class Employee extends BaseEntity {
         this.active = true;
     }
 
+    void updateDetails(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+    void linkCognitoUser(String cognitoSub) {
+        this.cognitoSub = cognitoSub;
+    }
+
 }

@@ -61,7 +61,9 @@ public final class TenantDtos {
             TenantStatus status,
             boolean visibleOnWebsite,
             String logoUrl,
+            String createdBy,
             Instant createdAt,
+            String updatedBy,
             Instant updatedAt
     ) {
     }

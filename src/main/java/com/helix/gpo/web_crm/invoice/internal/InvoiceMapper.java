@@ -75,7 +75,11 @@ final class InvoiceMapper {
                 invoice.getSentToEmail(),
                 invoice.getSentAt(),
                 invoice.getPaidDate(),
+                invoice.getIssuedBy(),
+                invoice.getIssuedAt(),
+                invoice.getCreatedBy(),
                 invoice.getCreatedAt(),
+                invoice.getUpdatedBy(),
                 invoice.getUpdatedAt()
         );
     }

@@ -36,6 +36,7 @@ final class ProjectMapper {
                         .toList(),
                 project.getCreatedBy(),
                 project.getCreatedAt(),
+                project.getUpdatedBy(),
                 project.getUpdatedAt()
         );
     }

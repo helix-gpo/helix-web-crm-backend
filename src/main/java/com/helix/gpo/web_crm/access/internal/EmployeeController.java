@@ -3,7 +3,6 @@ package com.helix.gpo.web_crm.access.internal;
 import com.helix.gpo.web_crm.access.internal.dto.AccessDtos;
 import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.CreateEmployeeRequest;
 import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.EmployeeResponse;
-import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.UpdateEmployeeRoleRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +25,15 @@ class EmployeeController {
         return ResponseEntity.created(URI.create("/api/crm/employees/" + response.id())).body(response);
     }
 
-    @PatchMapping("/{id}/role")
-    EmployeeResponse updateRole(@PathVariable UUID id, @Valid @RequestBody UpdateEmployeeRoleRequest request) {
-        return employeeService.updateRole(id, request);
+    @PatchMapping("/{id}")
+    EmployeeResponse update(@PathVariable UUID id, @Valid @RequestBody AccessDtos.UpdateEmployeeRequest request) {
+        return employeeService.update(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> delete(@PathVariable UUID id) {
+        employeeService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/projects/{projectId}")

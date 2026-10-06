@@ -1,5 +1,6 @@
 package com.helix.gpo.web_crm.access.internal;
 
+import com.helix.gpo.web_crm.access.AccessApi;
 import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.CreateRoleRequest;
 import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.RoleResponse;
 import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.UpdateRoleRequest;
@@ -17,8 +18,12 @@ import java.util.UUID;
 class RoleService {
 
     private final RoleRepository roleRepository;
+    private final EmployeeRepository employeeRepository;
+    private final AccessApi accessApi;
 
     RoleResponse create(CreateRoleRequest request) {
+        accessApi.requireAdministration();
+
         if (roleRepository.existsByNameIgnoreCase(request.name())) {
             throw new IllegalStateException("Eine Rolle mit diesem Namen existiert bereits.");
         }
@@ -34,12 +39,21 @@ class RoleService {
     }
 
     RoleResponse update(UUID id, UpdateRoleRequest request) {
+        accessApi.requireAdministration();
         Role role = getOrThrow(id);
 
         boolean nameTaken = roleRepository.existsByNameIgnoreCase(request.name())
                 && !role.getName().equalsIgnoreCase(request.name());
         if (nameTaken) {
             throw new IllegalStateException("Eine Rolle mit diesem Namen existiert bereits.");
+        }
+
+        boolean losesUnrestricted = role.isUnrestricted() && !Boolean.TRUE.equals(request.unrestricted());
+        if (losesUnrestricted
+                && employeeRepository.countActiveInRole(id) > 0
+                && employeeRepository.countActiveAdminsOutsideRole(id) == 0) {
+            throw new IllegalStateException(
+                    "Diese Rolle ist die einzige mit uneingeschränktem Zugriff. Ohne sie hätte niemand mehr Administratorrechte.");
         }
 
         role.updateDetails(
@@ -53,12 +67,20 @@ class RoleService {
     }
 
     void delete(UUID id) {
+        accessApi.requireAdministration();
         Role role = getOrThrow(id);
+
+        if (employeeRepository.existsAnyWithRole(id)) {
+            throw new IllegalStateException(
+                    "Dieser Rolle sind noch Mitarbeiter zugewiesen. Bitte weise sie zuerst einer anderen Rolle zu.");
+        }
+
         roleRepository.delete(role);
     }
 
     @Transactional(readOnly = true)
     List<RoleResponse> findAll() {
+        accessApi.requireAdministration();
         return roleRepository.findAll().stream()
                 .map(AccessMapper::toResponse)
                 .toList();
@@ -66,6 +88,7 @@ class RoleService {
 
     @Transactional(readOnly = true)
     RoleResponse findById(UUID id) {
+        accessApi.requireAdministration();
         return AccessMapper.toResponse(getOrThrow(id));
     }
 

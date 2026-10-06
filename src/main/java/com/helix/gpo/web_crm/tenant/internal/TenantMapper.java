@@ -25,7 +25,9 @@ final class TenantMapper {
                 tenant.getStatus(),
                 tenant.isVisibleOnWebsite(),
                 logoUrl,
+                tenant.getCreatedBy(),
                 tenant.getCreatedAt(),
+                tenant.getUpdatedBy(),
                 tenant.getUpdatedAt()
         );
     }
