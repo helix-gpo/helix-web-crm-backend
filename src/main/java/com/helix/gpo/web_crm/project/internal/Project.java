@@ -28,8 +28,7 @@ class Project extends BaseEntity {
     @Column(length = 500)
     private String description;
 
-    @Lob
-    @Column(name = "full_description")
+    @Column(name = "full_description", columnDefinition = "TEXT")
     private String fullDescription;
 
     @ElementCollection

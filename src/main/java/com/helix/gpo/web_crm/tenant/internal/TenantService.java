@@ -22,6 +22,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 class TenantService {
 
     private final TenantRepository tenantRepository;

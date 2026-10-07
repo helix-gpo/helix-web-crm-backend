@@ -20,6 +20,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 class ProjectService {
 
     private static final int MAX_VISIBLE_ON_WEBSITE = 6;

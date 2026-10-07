@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 class InvoiceService {
 
     private final InvoiceRepository invoiceRepository;

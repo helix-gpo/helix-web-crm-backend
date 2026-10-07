@@ -21,6 +21,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 class TestimonialService {
 
     private static final int DEFAULT_EXPIRY_DAYS = 30;
