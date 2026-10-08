@@ -4,6 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "helix.security.cognito")
 public record CognitoAdminProperties(
-        String userPoolId
+        String userPoolId,
+        String region
 ) {
 }

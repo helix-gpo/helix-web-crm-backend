@@ -49,6 +49,7 @@ helix:
     cognito:
       client-id: ${COGNITO_CLIENT_ID}
       user-pool-id: ${COGNITO_USER_POOL_ID}
+      region: ${COGNITO_REGION:us-east-1}
   s3:
     bucket: ${S3_BUCKET_NAME}
     region: eu-central-1
