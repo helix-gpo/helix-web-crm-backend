@@ -1,4 +1,4 @@
-package com.helix.gpo.web_crm.notification;
+package com.helix.gpo.web_crm.notification.internal;
 
 import java.util.List;
 

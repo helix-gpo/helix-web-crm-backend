@@ -1,5 +1,7 @@
 package com.helix.gpo.web_crm.tenant;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,5 +14,7 @@ public interface TenantApi {
     Optional<PartnerSummary> findPartnerSummaryById(UUID partnerId);
 
     Optional<String> findCreatedBy(UUID tenantId);
+
+    Map<UUID, PartnerSummary> findPartnerSummariesByIds(Collection<UUID> partnerIds);
 
 }

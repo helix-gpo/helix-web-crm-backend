@@ -1,4 +1,4 @@
-package com.helix.gpo.web_crm.notification;
+package com.helix.gpo.web_crm.notification.internal;
 
 public final class EmailLayout {
 
@@ -42,18 +42,6 @@ public final class EmailLayout {
                 </body>
                 </html>
                 """.formatted(preheader, bodyHtml);
-    }
-
-    public static String button(String label, String url) {
-        return """
-                <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 24px 0;">
-                  <tr>
-                    <td style="border-radius:8px; background-color:#0d1424;">
-                      <a href="%s" target="_blank" style="display:inline-block; padding:12px 24px; color:#ffffff; text-decoration:none; font-weight:600; font-size:14px; border-radius:8px;">%s</a>
-                    </td>
-                  </tr>
-                </table>
-                """.formatted(url, label);
     }
 
 }

@@ -1,10 +1,8 @@
 package com.helix.gpo.web_crm.notification.internal;
 
-import com.helix.gpo.web_crm.notification.EmailAttachment;
-import com.helix.gpo.web_crm.notification.EmailLayout;
-import com.helix.gpo.web_crm.notification.EmailMessage;
-import com.helix.gpo.web_crm.notification.NotificationApi;
+import com.helix.gpo.web_crm.notification.*;
 import com.helix.gpo.web_crm.notification.internal.config.NotificationProperties;
+import com.helix.gpo.web_crm.storage.StorageApi;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
@@ -15,6 +13,8 @@ import jakarta.mail.internet.MimeMultipart;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.sesv2.SesV2Client;
 import software.amazon.awssdk.services.sesv2.model.RawMessage;
@@ -23,6 +23,8 @@ import software.amazon.awssdk.services.sesv2.model.SendEmailRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
 @Component
@@ -31,9 +33,40 @@ class EmailService implements NotificationApi {
 
     private final SesV2Client sesV2Client;
     private final NotificationProperties properties;
+    private final TemplateEngine templateEngine;
+    private final StorageApi storageApi;
 
     @Override
-    public void send(EmailMessage message) {
+    public void send(OutgoingMail mail) {
+        switch (mail) {
+            case EmployeeInvitationMail m -> sendRaw(new EmailMessage(m.to(),
+                    "Dein Zugang zum Helix GPO CRM",
+                    "Dein CRM-Zugang wurde eingerichtet.",
+                    render("mail/employee-invitation",
+                            "firstName", m.firstName(), "email", m.to(), "temporaryPassword", m.temporaryPassword())));
+            case TestimonialInvitationMail m -> sendRaw(new EmailMessage(m.to(),
+                    "Wir würden uns über Ihre Referenz freuen – " + m.companyName(),
+                    "Teilen Sie in wenigen Minuten Ihre Erfahrung mit uns.",
+                    render("mail/testimonial-invitation", "firstName", m.firstName(), "link", m.link())));
+            case InvoiceMail m -> sendRaw(new EmailMessage(m.to(),
+                    "Rechnung " + m.invoiceNumber() + " – " + m.senderName(),
+                    "Ihre Rechnung " + m.invoiceNumber() + " finden Sie im Anhang.",
+                    render("mail/invoice", "invoiceNumber", m.invoiceNumber(), "senderName", m.senderName()),
+                    List.of(new EmailAttachment(m.invoiceNumber() + ".pdf",
+                            storageApi.download(m.documentKey()), "application/pdf"))));
+        }
+    }
+
+    // key/value pairs instead of Map.of, because values like firstName may be null
+    private String render(String template, Object... keyValues) {
+        Context context = new Context(Locale.GERMAN);
+        for (int i = 0; i < keyValues.length; i += 2) {
+            context.setVariable((String) keyValues[i], keyValues[i + 1]);
+        }
+        return templateEngine.process(template, context);
+    }
+
+    private void sendRaw(EmailMessage message) {
         try {
             MimeMessage mimeMessage = buildMimeMessage(message);
             sesV2Client.sendEmail(toSendRequest(mimeMessage));

@@ -11,4 +11,6 @@ public interface StorageApi {
 
     void delete(String key);
 
+    byte[] download(String key);
+
 }

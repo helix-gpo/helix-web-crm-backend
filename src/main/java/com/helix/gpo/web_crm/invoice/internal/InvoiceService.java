@@ -5,8 +5,7 @@ import com.helix.gpo.web_crm.access.EntityType;
 import com.helix.gpo.web_crm.invoice.internal.config.CompanyBillingProperties;
 import com.helix.gpo.web_crm.invoice.internal.dto.InvoiceDtos;
 import com.helix.gpo.web_crm.invoice.internal.dto.InvoiceDtos.*;
-import com.helix.gpo.web_crm.notification.EmailAttachment;
-import com.helix.gpo.web_crm.notification.EmailMessage;
+import com.helix.gpo.web_crm.notification.InvoiceMail;
 import com.helix.gpo.web_crm.notification.NotificationApi;
 import com.helix.gpo.web_crm.project.MilestoneSummary;
 import com.helix.gpo.web_crm.project.ProjectApi;
@@ -128,7 +127,7 @@ class InvoiceService {
         boolean sendDirectly = request != null && Boolean.TRUE.equals(request.sendEmailDirectly());
         if (sendDirectly) {
             String targetEmail = resolveTargetEmail(invoice, request.invoiceEmail());
-            sendInvoiceEmail(invoice, targetEmail, pdf, invoiceNumber);
+            notificationApi.send(new InvoiceMail(targetEmail, invoiceNumber, companyBillingProperties.name(), documentKey));
             invoice.markSent(targetEmail);
         }
 
@@ -142,8 +141,11 @@ class InvoiceService {
 
         String targetEmail = resolveTargetEmail(invoice, request != null ? request.email() : null);
 
-        byte[] pdf = invoicePdfService.render(invoice);
-        sendInvoiceEmail(invoice, targetEmail, pdf, invoice.getInvoiceNumber());
+        if (invoice.getDocumentKey() == null) {
+            throw new IllegalStateException("Für diese Rechnung existiert noch kein Dokument.");
+        }
+        notificationApi.send(new InvoiceMail(targetEmail, invoice.getInvoiceNumber(),
+                companyBillingProperties.name(), invoice.getDocumentKey()));
         invoice.markSent(targetEmail);
 
         return InvoiceMapper.toResponse(invoiceRepository.save(invoice));
@@ -168,25 +170,6 @@ class InvoiceService {
         }
         throw new IllegalArgumentException(
                 "Keine Rechnungs-E-Mail-Adresse hinterlegt und keine angegeben.");
-    }
-
-    private void sendInvoiceEmail(Invoice invoice, String toEmail, byte[] pdfBytes, String invoiceNumber) {
-        String subject = "Rechnung " + invoiceNumber + " – " + companyBillingProperties.name();
-        String preheader = "Ihre Rechnung " + invoiceNumber + " finden Sie im Anhang.";
-        String body = """
-            <p style="margin:0 0 16px;">Sehr geehrte Damen und Herren,</p>
-            <p style="margin:0 0 16px;">anbei erhalten Sie die Rechnung <strong>%s</strong> von %s.</p>
-            <p style="margin:0 0 16px;">Bitte begleichen Sie den Betrag innerhalb der angegebenen Zahlungsfrist. Bei Rückfragen antworten Sie gerne direkt auf diese E-Mail.</p>
-            <p style="margin:24px 0 0;">Mit freundlichen Grüßen<br/>%s</p>
-            """.formatted(invoiceNumber, companyBillingProperties.name(), companyBillingProperties.name());
-
-        notificationApi.send(new EmailMessage(
-                toEmail,
-                subject,
-                preheader,
-                body,
-                List.of(new EmailAttachment(invoiceNumber + ".pdf", pdfBytes, "application/pdf"))
-        ));
     }
 
     String getDocumentUrl(UUID invoiceId) {

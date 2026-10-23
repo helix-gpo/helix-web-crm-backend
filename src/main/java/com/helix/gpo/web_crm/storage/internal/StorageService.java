@@ -55,4 +55,12 @@ class S3StorageService implements StorageApi {
                 .build());
     }
 
+    @Override
+    public byte[] download(String key) {
+        return s3Client.getObjectAsBytes(GetObjectRequest.builder()
+                .bucket(properties.bucket())
+                .key(key)
+                .build()).asByteArray();
+    }
+
 }

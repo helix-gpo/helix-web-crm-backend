@@ -4,7 +4,7 @@ import com.helix.gpo.web_crm.access.AccessApi;
 import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.CreateEmployeeRequest;
 import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.EmployeeResponse;
 import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.UpdateEmployeeRequest;
-import com.helix.gpo.web_crm.notification.EmailMessage;
+import com.helix.gpo.web_crm.notification.EmployeeInvitationMail;
 import com.helix.gpo.web_crm.notification.NotificationApi;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -195,16 +195,7 @@ class EmployeeService {
     }
 
     private void sendInvitationEmail(Employee employee, String temporaryPassword) {
-        String subject = "Dein Zugang zum Helix GPO CRM";
-        String preheader = "Dein CRM-Zugang wurde eingerichtet.";
-        String body = """
-                <p style="margin:0 0 16px;">Hallo %s,</p>
-                <p style="margin:0 0 16px;">du hast ab sofort Zugang zum Helix GPO CRM.</p>
-                <p style="margin:0 0 16px;">Login: <strong>%s</strong><br/>Temporäres Passwort: <strong>%s</strong></p>
-                <p style="margin:0 0 16px;">Beim ersten Login wirst du gebeten, ein eigenes Passwort zu vergeben.</p>
-                """.formatted(employee.getFirstName(), employee.getEmail(), temporaryPassword);
-
-        notificationApi.send(new EmailMessage(employee.getEmail(), subject, preheader, body));
+        notificationApi.send(new EmployeeInvitationMail(employee.getEmail(), employee.getFirstName(), temporaryPassword));
     }
 
 }

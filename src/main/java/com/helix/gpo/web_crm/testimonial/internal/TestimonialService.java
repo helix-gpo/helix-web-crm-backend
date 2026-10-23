@@ -2,8 +2,8 @@ package com.helix.gpo.web_crm.testimonial.internal;
 
 import com.helix.gpo.web_crm.access.AccessApi;
 import com.helix.gpo.web_crm.access.EntityType;
-import com.helix.gpo.web_crm.notification.EmailMessage;
 import com.helix.gpo.web_crm.notification.NotificationApi;
+import com.helix.gpo.web_crm.notification.TestimonialInvitationMail;
 import com.helix.gpo.web_crm.tenant.PartnerSummary;
 import com.helix.gpo.web_crm.tenant.TenantApi;
 import com.helix.gpo.web_crm.testimonial.internal.config.WebsiteProperties;
@@ -17,7 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -167,24 +170,26 @@ class TestimonialService {
     @Transactional(readOnly = true)
     List<TestimonialResponse> findAll() {
         accessApi.requireRead(EntityType.TESTIMONIAL);
-        return filterAccessible(testimonialRepository.findAll()).stream()
-                .map(this::toResponse)
-                .toList();
+        return toResponses(filterAccessible(testimonialRepository.findAll()));
     }
 
     @Transactional(readOnly = true)
     List<TestimonialResponse> findAllByTenant(UUID tenantId) {
         accessApi.requireRead(EntityType.TESTIMONIAL);
-        return filterAccessible(testimonialRepository.findAllByTenantId(tenantId)).stream()
-                .map(this::toResponse)
-                .toList();
+        return toResponses(filterAccessible(testimonialRepository.findAllByTenantId(tenantId)));
     }
 
-    // public api for website - no access check
-    @Transactional(readOnly = true)
-    List<TestimonialResponse> findAllVisibleOnWebsite() {
-        return testimonialRepository.findAllByVisibleOnWebsiteTrueOrderByCreatedAtDesc().stream()
-                .map(this::toResponse)
+    private List<TestimonialResponse> toResponses(List<Testimonial> testimonials) {
+        Map<UUID, PartnerSummary> partners = tenantApi.findPartnerSummariesByIds(
+                testimonials.stream()
+                        .map(Testimonial::getPartnerId)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet()));
+        return testimonials.stream()
+                .map(t -> {
+                    PartnerSummary partner = partners.get(t.getPartnerId());
+                    return TestimonialMapper.toResponse(t, partner != null ? partner.photoUrl() : null);
+                })
                 .toList();
     }
 
@@ -202,17 +207,7 @@ class TestimonialService {
 
     private void sendInvitationEmail(PartnerSummary partner, String toEmail, String rawToken) {
         String link = websiteProperties.baseUrl() + "/feedback?token=" + rawToken;
-        String subject = "Wir würden uns über Ihre Referenz freuen – " + partner.companyName();
-        String preheader = "Teilen Sie in wenigen Minuten Ihre Erfahrung mit uns.";
-        String body = """
-            <p style="margin:0 0 16px;">Hallo %s,</p>
-            <p style="margin:0 0 16px;">vielen Dank für die Zusammenarbeit! Wir würden uns sehr über eine kurze Referenz von Ihnen freuen – es dauert nur wenige Minuten.</p>
-            %s
-            <p style="margin:24px 0 0; font-size:13px; color:#8a93a6;">Der Link ist einmalig gültig und läuft automatisch ab.</p>
-            <p style="margin:16px 0 0;">Viele Grüße<br/>Helix GPO</p>
-            """.formatted(partner.firstName(), com.helix.gpo.web_crm.notification.EmailLayout.button("Referenz abgeben", link));
-
-        notificationApi.send(new EmailMessage(toEmail, subject, preheader, body));
+        notificationApi.send(new TestimonialInvitationMail(toEmail, partner.firstName(), partner.companyName(), link));
     }
 
     void revokeInvitation(UUID invitationId) {

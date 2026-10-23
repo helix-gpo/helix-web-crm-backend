@@ -1,0 +1,23 @@
+-- replace cognito subs in audit columns with the employee email
+UPDATE employee_project_assignments t JOIN employees e ON t.created_by = e.cognito_sub SET t.created_by = e.email;
+UPDATE employee_project_assignments t JOIN employees e ON t.updated_by = e.cognito_sub SET t.updated_by = e.email;
+UPDATE employees t JOIN employees e ON t.created_by = e.cognito_sub SET t.created_by = e.email;
+UPDATE employees t JOIN employees e ON t.updated_by = e.cognito_sub SET t.updated_by = e.email;
+UPDATE invoice_line_items t JOIN employees e ON t.created_by = e.cognito_sub SET t.created_by = e.email;
+UPDATE invoice_line_items t JOIN employees e ON t.updated_by = e.cognito_sub SET t.updated_by = e.email;
+UPDATE invoices t JOIN employees e ON t.created_by = e.cognito_sub SET t.created_by = e.email;
+UPDATE invoices t JOIN employees e ON t.updated_by = e.cognito_sub SET t.updated_by = e.email;
+UPDATE milestones t JOIN employees e ON t.created_by = e.cognito_sub SET t.created_by = e.email;
+UPDATE milestones t JOIN employees e ON t.updated_by = e.cognito_sub SET t.updated_by = e.email;
+UPDATE projects t JOIN employees e ON t.created_by = e.cognito_sub SET t.created_by = e.email;
+UPDATE projects t JOIN employees e ON t.updated_by = e.cognito_sub SET t.updated_by = e.email;
+UPDATE roles t JOIN employees e ON t.created_by = e.cognito_sub SET t.created_by = e.email;
+UPDATE roles t JOIN employees e ON t.updated_by = e.cognito_sub SET t.updated_by = e.email;
+UPDATE tenant_partners t JOIN employees e ON t.created_by = e.cognito_sub SET t.created_by = e.email;
+UPDATE tenant_partners t JOIN employees e ON t.updated_by = e.cognito_sub SET t.updated_by = e.email;
+UPDATE tenants t JOIN employees e ON t.created_by = e.cognito_sub SET t.created_by = e.email;
+UPDATE tenants t JOIN employees e ON t.updated_by = e.cognito_sub SET t.updated_by = e.email;
+UPDATE testimonial_invitations t JOIN employees e ON t.created_by = e.cognito_sub SET t.created_by = e.email;
+UPDATE testimonial_invitations t JOIN employees e ON t.updated_by = e.cognito_sub SET t.updated_by = e.email;
+UPDATE testimonials t JOIN employees e ON t.created_by = e.cognito_sub SET t.created_by = e.email;
+UPDATE testimonials t JOIN employees e ON t.updated_by = e.cognito_sub SET t.updated_by = e.email;

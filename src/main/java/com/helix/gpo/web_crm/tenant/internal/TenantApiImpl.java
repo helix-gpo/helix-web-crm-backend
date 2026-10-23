@@ -8,8 +8,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -34,12 +37,23 @@ class TenantApiImpl implements TenantApi {
 
     @Override
     public Optional<PartnerSummary> findPartnerSummaryById(UUID partnerId) {
-        return partnerRepository.findById(partnerId).map(partner -> {
-            String photoUrl = partner.getPhotoKey() != null
-                    ? storageApi.presignedUrl(partner.getPhotoKey(), Duration.ofMinutes(30))
-                    : null;
-            return TenantMapper.toPartnerSummary(partner, photoUrl);
-        });
+        return partnerRepository.findById(partnerId).map(this::toPartnerSummary);
+    }
+
+    @Override
+    public Map<UUID, PartnerSummary> findPartnerSummariesByIds(Collection<UUID> partnerIds) {
+        if (partnerIds.isEmpty()) {
+            return Map.of();
+        }
+        return partnerRepository.findAllById(partnerIds).stream()
+                .collect(Collectors.toMap(Partner::getId, this::toPartnerSummary));
+    }
+
+    private PartnerSummary toPartnerSummary(Partner partner) {
+        String photoUrl = partner.getPhotoKey() != null
+                ? storageApi.presignedUrl(partner.getPhotoKey(), Duration.ofMinutes(30))
+                : null;
+        return TenantMapper.toPartnerSummary(partner, photoUrl);
     }
 
     @Override
