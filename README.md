@@ -2,6 +2,9 @@
 
 ## Vor dem Go-Live
 
+### 0. Punkte:
+- Partner bei Mandant direkt mit anlegen funktioniert nicht
+
 ### 1. Entscheidungen (blockieren alles Weitere)
 - IaC-Werkzeug, Cognito-Region
 - Domains (CRM, API, Website) und Hosting (CRM-Frontend statisch, Website SSR/Node)
