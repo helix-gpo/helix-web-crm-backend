@@ -29,21 +29,22 @@ import java.util.Properties;
 
 @Component
 @RequiredArgsConstructor
-class EmailService implements NotificationApi {
+class EmailService {
 
     private final SesV2Client sesV2Client;
     private final NotificationProperties properties;
     private final TemplateEngine templateEngine;
     private final StorageApi storageApi;
 
-    @Override
     public void send(OutgoingMail mail) {
         switch (mail) {
             case EmployeeInvitationMail m -> sendRaw(new EmailMessage(m.to(),
                     "Dein Zugang zum Helix GPO CRM",
                     "Dein CRM-Zugang wurde eingerichtet.",
                     render("mail/employee-invitation",
-                            "firstName", m.firstName(), "email", m.to(), "temporaryPassword", m.temporaryPassword())));
+                            "firstName", m.firstName(), "email", m.to(),
+                            "temporaryPassword", m.temporaryPassword(),
+                            "loginUrl", properties.crmUrl() + "/login")));
             case TestimonialInvitationMail m -> sendRaw(new EmailMessage(m.to(),
                     "Wir würden uns über Ihre Referenz freuen – " + m.companyName(),
                     "Teilen Sie in wenigen Minuten Ihre Erfahrung mit uns.",

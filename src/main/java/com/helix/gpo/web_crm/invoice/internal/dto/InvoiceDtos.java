@@ -22,9 +22,9 @@ public final class InvoiceDtos {
     public record LineItemRequest(
             @NotNull LineItemSource source,
             UUID milestoneId,
-            String description,
+            @Size(max = 300) String description,
             BigDecimal quantity,
-            String unitCode,
+            @Size(max = 10) String unitCode,
             Money unitPrice,
             BigDecimal taxRatePercentage
     ) {
@@ -48,9 +48,9 @@ public final class InvoiceDtos {
 
     // nested resource: line items
     public record UpdateLineItemRequest(
-            @NotBlank String description,
+            @NotBlank @Size(max = 300) String description,
             BigDecimal quantity,
-            String unitCode,
+            @Size(max = 10) String unitCode,
             @NotNull Money unitPrice,
             BigDecimal taxRatePercentage
     ) {
@@ -60,12 +60,12 @@ public final class InvoiceDtos {
     public record IssueInvoiceRequest(
             LocalDate issueDate,
             Boolean sendEmailDirectly,
-            String invoiceEmail
+            @Email @Size(max = 254) String invoiceEmail
     ) {
     }
 
     public record SendInvoiceRequest(
-            @Email String email
+            @Email @Size(max = 254) String email
     ) {
     }
 

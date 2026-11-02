@@ -6,7 +6,6 @@ import com.helix.gpo.web_crm.invoice.internal.config.CompanyBillingProperties;
 import com.helix.gpo.web_crm.invoice.internal.dto.InvoiceDtos;
 import com.helix.gpo.web_crm.invoice.internal.dto.InvoiceDtos.*;
 import com.helix.gpo.web_crm.notification.InvoiceMail;
-import com.helix.gpo.web_crm.notification.NotificationApi;
 import com.helix.gpo.web_crm.project.MilestoneSummary;
 import com.helix.gpo.web_crm.project.ProjectApi;
 import com.helix.gpo.web_crm.shared.Money;
@@ -15,6 +14,7 @@ import com.helix.gpo.web_crm.tenant.TenantApi;
 import com.helix.gpo.web_crm.tenant.TenantBillingDetails;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +38,7 @@ class InvoiceService {
     private final TenantApi tenantApi;
     private final ProjectApi projectApi;
     private final StorageApi storageApi;
-    private final NotificationApi notificationApi;
+    private final ApplicationEventPublisher events;
     private final AccessApi accessApi;
 
     private final InvoiceNumberGenerator invoiceNumberGenerator;
@@ -127,7 +127,7 @@ class InvoiceService {
         boolean sendDirectly = request != null && Boolean.TRUE.equals(request.sendEmailDirectly());
         if (sendDirectly) {
             String targetEmail = resolveTargetEmail(invoice, request.invoiceEmail());
-            notificationApi.send(new InvoiceMail(targetEmail, invoiceNumber, companyBillingProperties.name(), documentKey));
+            events.publishEvent(new InvoiceMail(targetEmail, invoiceNumber, companyBillingProperties.name(), documentKey));
             invoice.markSent(targetEmail);
         }
 
@@ -144,7 +144,7 @@ class InvoiceService {
         if (invoice.getDocumentKey() == null) {
             throw new IllegalStateException("Für diese Rechnung existiert noch kein Dokument.");
         }
-        notificationApi.send(new InvoiceMail(targetEmail, invoice.getInvoiceNumber(),
+        events.publishEvent(new InvoiceMail(targetEmail, invoice.getInvoiceNumber(),
                 companyBillingProperties.name(), invoice.getDocumentKey()));
         invoice.markSent(targetEmail);
 

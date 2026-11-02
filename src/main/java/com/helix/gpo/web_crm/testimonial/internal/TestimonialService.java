@@ -2,7 +2,6 @@ package com.helix.gpo.web_crm.testimonial.internal;
 
 import com.helix.gpo.web_crm.access.AccessApi;
 import com.helix.gpo.web_crm.access.EntityType;
-import com.helix.gpo.web_crm.notification.NotificationApi;
 import com.helix.gpo.web_crm.notification.TestimonialInvitationMail;
 import com.helix.gpo.web_crm.tenant.PartnerSummary;
 import com.helix.gpo.web_crm.tenant.TenantApi;
@@ -10,6 +9,7 @@ import com.helix.gpo.web_crm.testimonial.internal.config.WebsiteProperties;
 import com.helix.gpo.web_crm.testimonial.internal.dto.TestimonialDtos.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +34,7 @@ class TestimonialService {
     private final TestimonialRepository testimonialRepository;
 
     private final TenantApi tenantApi;
-    private final NotificationApi notificationApi;
+    private final ApplicationEventPublisher events;
     private final AccessApi accessApi;
 
     private final TokenGenerator tokenGenerator;
@@ -207,7 +207,7 @@ class TestimonialService {
 
     private void sendInvitationEmail(PartnerSummary partner, String toEmail, String rawToken) {
         String link = websiteProperties.baseUrl() + "/feedback?token=" + rawToken;
-        notificationApi.send(new TestimonialInvitationMail(toEmail, partner.firstName(), partner.companyName(), link));
+        events.publishEvent(new TestimonialInvitationMail(toEmail, partner.firstName(), partner.companyName(), link));
     }
 
     void revokeInvitation(UUID invitationId) {

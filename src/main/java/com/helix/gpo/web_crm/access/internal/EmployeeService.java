@@ -5,9 +5,9 @@ import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.CreateEmployeeReques
 import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.EmployeeResponse;
 import com.helix.gpo.web_crm.access.internal.dto.AccessDtos.UpdateEmployeeRequest;
 import com.helix.gpo.web_crm.notification.EmployeeInvitationMail;
-import com.helix.gpo.web_crm.notification.NotificationApi;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +27,7 @@ class EmployeeService {
     private final RoleRepository roleRepository;
     private final CognitoAdminService cognitoAdminService;
     private final CurrentUserDirectory currentUserDirectory;
-    private final NotificationApi notificationApi;
+    private final ApplicationEventPublisher events;
     private final AccessApi accessApi;
 
     EmployeeResponse create(CreateEmployeeRequest request) {
@@ -195,7 +195,7 @@ class EmployeeService {
     }
 
     private void sendInvitationEmail(Employee employee, String temporaryPassword) {
-        notificationApi.send(new EmployeeInvitationMail(employee.getEmail(), employee.getFirstName(), temporaryPassword));
+        events.publishEvent(new EmployeeInvitationMail(employee.getEmail(), employee.getFirstName(), temporaryPassword));
     }
 
 }

@@ -3,8 +3,10 @@ package com.helix.gpo.web_crm.project.internal.dto;
 import com.helix.gpo.web_crm.project.internal.MilestoneStatus;
 import com.helix.gpo.web_crm.project.internal.ProjectStatus;
 import com.helix.gpo.web_crm.shared.Money;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.time.Instant;
@@ -19,16 +21,16 @@ public final class ProjectDtos {
 
     public record ProjectTagDto(
             @Size(max = 60) String value,
-            @Size(max = 7) String colorHex
+            @Size(max = 7) @Pattern(regexp = "^#[0-9a-fA-F]{6}$") String colorHex
     ) {}
 
     public record CreateProjectRequest(
             @NotNull UUID tenantId,
-            @NotBlank String title,
-            String description,
-            String fullDescription,
-            List<String> highlights,
-            List<ProjectTagDto> tags,
+            @NotBlank @Size(max = 160) String title,
+            @Size(max = 500) String description,
+            @Size(max = 10000) String fullDescription,
+            @Size(max = 10) List<@Size(max = 300) String> highlights,
+            @Size(max = 10) @Valid List<ProjectTagDto> tags,
             LocalDate startDate,
             LocalDate endDate,
             ProjectStatus status
@@ -39,8 +41,8 @@ public final class ProjectDtos {
     }
 
     public record AddMilestoneRequest(
-            @NotBlank String title,
-            String description,
+            @NotBlank @Size(max = 160) String title,
+            @Size(max = 500) String description,
             LocalDate dueDate,
             Money price
     ) {
@@ -79,24 +81,24 @@ public final class ProjectDtos {
     }
 
     public record UpdateProjectRequest(
-            @NotBlank String title,
-            String description,
-            String fullDescription,
-            List<String> highlights,
-            List<ProjectTagDto> tags,
+            @NotBlank @Size(max = 160) String title,
+            @Size(max = 500) String description,
+            @Size(max = 10000) String fullDescription,
+            @Size(max = 10) List<@Size(max = 300) String> highlights,
+            @Size(max = 10) @Valid List<ProjectTagDto> tags,
             LocalDate startDate,
             LocalDate endDate
     ) {
     }
 
     public record UpdateProjectNotesRequest(
-            String notes
+            @Size(max = 10000) String notes
     ) {
     }
 
     public record UpdateMilestoneRequest(
-            @NotBlank String title,
-            String description,
+            @NotBlank @Size(max = 160) String title,
+            @Size(max = 500) String description,
             LocalDate dueDate,
             Money price,
             @NotNull MilestoneStatus status

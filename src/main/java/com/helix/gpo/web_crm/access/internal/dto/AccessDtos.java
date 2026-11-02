@@ -2,9 +2,11 @@ package com.helix.gpo.web_crm.access.internal.dto;
 
 import com.helix.gpo.web_crm.access.EntityType;
 import com.helix.gpo.web_crm.access.PermissionAction;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,33 +24,33 @@ public final class AccessDtos {
     }
 
     public record CreateRoleRequest(
-            @NotBlank String name,
-            String description,
+            @NotBlank @Size(max = 60) String name,
+            @Size(max = 255) String description,
             Boolean unrestricted,
-            List<PermissionEntryDto> permissions
+            @Valid List<PermissionEntryDto> permissions
     ) {
     }
 
     public record CreateEmployeeRequest(
-            @NotBlank @Email String email,
-            @NotBlank String firstName,
-            @NotBlank String lastName,
+            @NotBlank @Email @Size(max = 254) String email,
+            @NotBlank @Size(max = 100) String firstName,
+            @NotBlank @Size(max = 100) String lastName,
             @NotNull UUID roleId
     ) {
     }
 
     // update
     public record UpdateRoleRequest(
-            @NotBlank String name,
-            String description,
+            @NotBlank @Size(max = 60) String name,
+            @Size(max = 255) String description,
             Boolean unrestricted,
-            List<PermissionEntryDto> permissions
+            @Valid List<PermissionEntryDto> permissions
     ) {
     }
 
     public record UpdateEmployeeRequest(
-            @NotBlank String firstName,
-            @NotBlank String lastName,
+            @NotBlank @Size(max = 100) String firstName,
+            @NotBlank @Size(max = 100) String lastName,
             @NotNull UUID roleId
     ) {
     }

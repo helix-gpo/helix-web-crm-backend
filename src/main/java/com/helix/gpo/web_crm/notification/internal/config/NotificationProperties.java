@@ -8,6 +8,7 @@ public record NotificationProperties(
         String senderName,
         String replyToEmail,
         String logoUrl,
-        String region
+        String region,
+        String crmUrl
 ) {
 }

@@ -2,10 +2,7 @@ package com.helix.gpo.web_crm.testimonial.internal.dto;
 
 import com.helix.gpo.web_crm.testimonial.internal.InvitationStatus;
 import com.helix.gpo.web_crm.testimonial.internal.TestimonialStatus;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -18,9 +15,9 @@ public final class TestimonialDtos {
     public record CreateInvitationRequest(
             @NotNull UUID partnerId,
             UUID projectId,
-            Integer expiresInDays,
+            @Min(1) @Max(90) Integer expiresInDays,
             Boolean sendEmail,
-            String email
+            @Email @Size(max = 254) String email
     ) {
     }
 
@@ -47,8 +44,8 @@ public final class TestimonialDtos {
     }
 
     public record SubmitTestimonialRequest(
-            @NotBlank String token,
-            @NotBlank String description,
+            @NotBlank @Size(max = 128) String token,
+            @NotBlank @Size(max = 1000) String description,
             @Min(1) @Max(5) int rating
     ) {
     }

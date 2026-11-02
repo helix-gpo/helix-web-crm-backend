@@ -17,36 +17,36 @@ public final class TenantDtos {
     }
 
     public record CreateTenantRequest(
-            @NotBlank String companyName,
-            String legalName,
-            String vatId,
+            @NotBlank @Size(max = 160) String companyName,
+            @Size(max = 160) String legalName,
+            @Size(max = 20) String vatId,
             @NotBlank @Size(max = 12) String referenceCode,
-            Address address,
-            @Email String contactEmail,
-            String contactPhone,
-            String websiteUrl,
+            @Valid Address address,
+            @Email @Size(max = 254) String contactEmail,
+            @Size(max = 30) String contactPhone,
+            @Size(max = 500) String websiteUrl,
             @Valid List<CreatePartnerRequest> partners
     ) {
     }
 
     public record UpdateContactDetailsRequest(
-            @Email String contactEmail,
-            String contactPhone,
-            Address address,
-            String websiteUrl
+            @Email @Size(max = 254) String contactEmail,
+            @Size(max = 30) String contactPhone,
+            @Valid Address address,
+            @Size(max = 500) String websiteUrl
     ) {
     }
 
     public record UpdateCoreDetailsRequest(
-            @NotBlank String companyName,
-            String legalName,
+            @NotBlank @Size(max = 160) String companyName,
+            @Size(max = 160) String legalName,
             @Size(max = 20) String vatId,
             @NotBlank @Size(max = 12) String referenceCode
     ) {
     }
 
     public record UpdateNotesRequest(
-            String notes
+            @Size(max = 10000) String notes
     ) {
     }
 
@@ -83,20 +83,20 @@ public final class TenantDtos {
     }
 
     public record CreatePartnerRequest(
-            @NotBlank String firstName,
-            @NotBlank String lastName,
-            String role,
-            @Email String email,
-            String phone
+            @NotBlank @Size(max = 100) String firstName,
+            @NotBlank @Size(max = 100) String lastName,
+            @Size(max = 100) String role,
+            @Email @Size(max = 254) String email,
+            @Size(max = 30) String phone
     ) {
     }
 
     public record UpdatePartnerRequest(
-            @NotBlank String firstName,
-            @NotBlank String lastName,
-            String role,
-            @Email String email,
-            String phone
+            @NotBlank @Size(max = 100) String firstName,
+            @NotBlank @Size(max = 100) String lastName,
+            @Size(max = 100) String role,
+            @Email @Size(max = 254) String email,
+            @Size(max = 30) String phone
     ) {
     }
 

@@ -2,24 +2,24 @@
 
 ## Vor dem Go-Live
 
-### 0. Punkte:
-- Referenz Foto hinzufügen - erst mit Website
-
-### 1. Entscheidungen (blockieren alles Weitere)
-- IaC-Werkzeug, Cognito-Region
-- Domains (CRM, API, Website) und Hosting (CRM-Frontend statisch, Website SSR/Node)
-- Absender-Adresse für Mails (Workspace-Domain vs. Gmail)
+### 1. Entscheidungen - DONE!
+- IaC: Terraform · Cognito Prod: eu-central-1 (Dev bleibt us-east-1)
+- Domains: www.helix-gpo.com, api.helix-gpo.com, crm.helix-gpo.com (Route 53 vorhanden)
+- Hosting: Backend + Website auf ECS Fargate hinter einem ALB, CRM-Frontend auf S3 + CloudFront
+- Mails: SES mit noreply@helix-gpo.com, Reply-To vorerst Gmail · kein Staging
 
 ### 2. Code fertigstellen
 - ⚠️ Flyway-Baseline, Credential-Kette, Test-Endpunkt entfernt, Cron-Zeitzone - DONE!
-- Fail-closed abschließen (Henry anlegen, Übergangs-Ausnahme entfernen)
-- Altlasten: `created_by` mit UUIDs, `console.log`, altes Passwort rotieren, N+1-Abfragen
-- Mail-Versand in eigenen Service auslagern
+- Fail-closed abschließen - DONE!
+- Altlasten: `created_by`, `console.log`, N+1 - DONE! · offen: altes Passwort rotieren (welches?)
+- Testrunde: Partner beim Mandanten, Mandant → Projekt, Mail-Button, Mandanten-Filter - DONE!
+- Mail-Versand: Templates + typisierte Mails - DONE! · offen: Versand nach Commit, asynchron mit Retry
 - Einladungsmail für Mitarbeiter mit Login-Link
 - Frontend Validierungen (Zeichenlänge etc.)
 - Health-Endpunkt für den Load Balancer
-- Environments Frontend und Backend (Prod-Profil, Prod-Cognito-Client), CORS aus Config
+- Environments Frontend und Backend (Prod-Profil, Prod-Cognito-Client, Cognito-Region), CORS aus Config
 - Website an Backend anbinden (Projekte, Referenzen, Feedback-Submit, Env-URLs auf /api/public)
+    - öffentlicher Bild-Endpunkt (Projektbilder + Referenzfoto mit Einwilligung)
 - Prod-Start als Migration vorbereiten (Admin-Rolle, erste Admins, Rechnungsnummern-Startwert)
 - Bilder zurecht schneiden
 
