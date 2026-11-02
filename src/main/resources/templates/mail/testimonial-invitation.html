@@ -1,11 +1,18 @@
 <p style="margin:0 0 16px;">Hallo <span th:text="${firstName}"></span>,</p>
 <p style="margin:0 0 16px;">vielen Dank für die Zusammenarbeit! Wir würden uns sehr über eine kurze Referenz von Ihnen freuen – es dauert nur wenige Minuten.</p>
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin: 24px 0;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 28px 0 8px;">
     <tr>
-        <td style="border-radius:8px; background-color:#0d1424;">
-            <a th:href="${link}" target="_blank" style="display:inline-block; padding:12px 24px; color:#ffffff; text-decoration:none; font-weight:600; font-size:14px; border-radius:8px;">Referenz abgeben</a>
+        <td align="center" bgcolor="#03dbff" style="border-radius:8px; background-color:#03dbff; box-shadow:0 4px 12px rgba(3,219,255,0.25);">
+            <a th:href="${link}" target="_blank"
+               style="display:inline-block; padding:14px 32px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:15px; font-weight:700; line-height:1; color:#0d1424; text-decoration:none; border-radius:8px; letter-spacing:0.2px;">
+                Jetzt Referenz abgeben &rarr;
+            </a>
         </td>
     </tr>
 </table>
+<p style="margin:0 0 24px; font-size:12px; color:#8a93a6; line-height:1.5;">
+    Button funktioniert nicht? Diesen Link im Browser öffnen:<br/>
+    <a th:href="${link}" th:text="${link}" style="color:#02afcc; word-break:break-all;"></a>
+</p>
 <p style="margin:24px 0 0; font-size:13px; color:#8a93a6;">Der Link ist einmalig gültig und läuft automatisch ab.</p>
 <p style="margin:16px 0 0;">Viele Grüße<br/>Helix GPO</p>

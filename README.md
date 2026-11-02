@@ -3,7 +3,7 @@
 ## Vor dem Go-Live
 
 ### 0. Punkte:
-- Partner bei Mandant direkt mit anlegen funktioniert nicht
+- Referenz Foto hinzufügen - erst mit Website
 
 ### 1. Entscheidungen (blockieren alles Weitere)
 - IaC-Werkzeug, Cognito-Region

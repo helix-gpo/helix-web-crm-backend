@@ -33,8 +33,12 @@ class TenantService {
 
     TenantResponse create(CreateTenantRequest request) {
         accessApi.requireWrite(EntityType.TENANT);
+        boolean withPartners = request.partners() != null && !request.partners().isEmpty();
+        if (withPartners) {
+            accessApi.requireWrite(EntityType.PARTNER);
+        }
 
-        Tenant tenant = Tenant.builder()
+        Tenant tenant = tenantRepository.save(Tenant.builder()
                 .companyName(request.companyName())
                 .legalName(request.legalName())
                 .vatId(request.vatId())
@@ -43,9 +47,12 @@ class TenantService {
                 .contactEmail(request.contactEmail())
                 .contactPhone(request.contactPhone())
                 .websiteUrl(request.websiteUrl())
-                .build();
+                .build());
 
-        return toResponse(tenantRepository.save(tenant));
+        if (withPartners) {
+            request.partners().forEach(p -> partnerRepository.save(newPartner(tenant, p)));
+        }
+        return toResponse(tenant);
     }
 
     @Transactional(readOnly = true)
@@ -158,8 +165,11 @@ class TenantService {
         accessApi.requireWrite(EntityType.PARTNER);
         Tenant tenant = getTenantOrThrow(tenantId);
         requireTenantAccess(tenant);
+        return toPartnerResponse(partnerRepository.save(newPartner(tenant, request)));
+    }
 
-        Partner partner = Partner.builder()
+    private Partner newPartner(Tenant tenant, TenantDtos.CreatePartnerRequest request) {
+        return Partner.builder()
                 .tenant(tenant)
                 .firstName(request.firstName())
                 .lastName(request.lastName())
@@ -167,8 +177,6 @@ class TenantService {
                 .email(request.email())
                 .phone(request.phone())
                 .build();
-
-        return toPartnerResponse(partnerRepository.save(partner));
     }
 
     TenantDtos.PartnerResponse updatePartner(UUID partnerId, TenantDtos.UpdatePartnerRequest request) {

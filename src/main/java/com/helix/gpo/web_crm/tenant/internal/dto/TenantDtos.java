@@ -2,11 +2,13 @@ package com.helix.gpo.web_crm.tenant.internal.dto;
 
 import com.helix.gpo.web_crm.shared.Address;
 import com.helix.gpo.web_crm.tenant.internal.TenantStatus;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public final class TenantDtos {
@@ -22,7 +24,8 @@ public final class TenantDtos {
             Address address,
             @Email String contactEmail,
             String contactPhone,
-            String websiteUrl
+            String websiteUrl,
+            @Valid List<CreatePartnerRequest> partners
     ) {
     }
 
