@@ -93,17 +93,6 @@ class TenantController {
         return tenantService.removeLogo(id);
     }
 
-    @PostMapping(value = "/{tenantId}/partners/{partnerId}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    PartnerResponse uploadPartnerPhoto(@PathVariable UUID tenantId, @PathVariable UUID partnerId,
-                                       @RequestParam("file") MultipartFile file) {
-        return tenantService.uploadPartnerPhoto(partnerId, file);
-    }
-
-    @DeleteMapping("/{tenantId}/partners/{partnerId}/photo")
-    PartnerResponse removePartnerPhoto(@PathVariable UUID tenantId, @PathVariable UUID partnerId) {
-        return tenantService.removePartnerPhoto(partnerId);
-    }
-
     @PatchMapping("/{id}/notes")
     TenantResponse updateNotes(@PathVariable UUID id, @RequestBody UpdateNotesRequest request) {
         return tenantService.updateNotes(id, request);

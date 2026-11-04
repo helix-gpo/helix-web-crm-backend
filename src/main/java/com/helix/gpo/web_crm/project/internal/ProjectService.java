@@ -3,18 +3,13 @@ package com.helix.gpo.web_crm.project.internal;
 import com.helix.gpo.web_crm.access.AccessApi;
 import com.helix.gpo.web_crm.access.EntityType;
 import com.helix.gpo.web_crm.project.internal.dto.ProjectDtos;
-import com.helix.gpo.web_crm.shared.ImageUploadValidator;
-import com.helix.gpo.web_crm.storage.StorageApi;
 import com.helix.gpo.web_crm.tenant.TenantApi;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +23,6 @@ class ProjectService {
     private final ProjectRepository projectRepository;
     private final MilestoneRepository milestoneRepository;
     private final TenantApi tenantApi;
-    private final StorageApi storageApi;
     private final AccessApi accessApi;
 
     ProjectDtos.ProjectResponse create(ProjectDtos.CreateProjectRequest request) {
@@ -131,40 +125,6 @@ class ProjectService {
         return toResponse(project);
     }
 
-    ProjectDtos.ProjectResponse uploadImage(UUID projectId, MultipartFile file) {
-        accessApi.requireWrite(EntityType.PROJECT);
-        Project project = getProjectOrThrow(projectId);
-        requireProjectAccess(project);
-
-        ImageUploadValidator.validate(file);
-
-        if (project.getImageKey() != null) {
-            storageApi.delete(project.getImageKey());
-        }
-
-        String key = ImageUploadValidator.generateKey("project-images", projectId, file);
-        try {
-            storageApi.upload(key, file.getBytes(), file.getContentType());
-        } catch (IOException e) {
-            throw new IllegalStateException("Bild konnte nicht hochgeladen werden.", e);
-        }
-
-        project.attachImage(key);
-        return toResponse(project);
-    }
-
-    ProjectDtos.ProjectResponse removeImage(UUID projectId) {
-        accessApi.requireWrite(EntityType.PROJECT);
-        Project project = getProjectOrThrow(projectId);
-        requireProjectAccess(project);
-
-        if (project.getImageKey() != null) {
-            storageApi.delete(project.getImageKey());
-            project.removeImage();
-        }
-        return toResponse(project);
-    }
-
     ProjectDtos.ProjectResponse updateNotes(UUID id, ProjectDtos.UpdateProjectNotesRequest request) {
         accessApi.requireWrite(EntityType.PROJECT);
         Project project = getProjectOrThrow(id);
@@ -235,10 +195,7 @@ class ProjectService {
     }
 
     private ProjectDtos.ProjectResponse toResponse(Project project) {
-        String imageUrl = project.getImageKey() != null
-                ? storageApi.presignedUrl(project.getImageKey(), Duration.ofMinutes(30))
-                : null;
-        return ProjectMapper.toResponse(project, imageUrl);
+        return ProjectMapper.toResponse(project);
     }
 
     private List<Project> filterAccessible(List<Project> projects) {

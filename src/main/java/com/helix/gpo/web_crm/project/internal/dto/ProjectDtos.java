@@ -70,7 +70,6 @@ public final class ProjectDtos {
             LocalDate startDate,
             LocalDate endDate,
             boolean visibleOnWebsite,
-            String imageUrl,
             String notes,
             List<MilestoneResponse> milestones,
             String createdBy,

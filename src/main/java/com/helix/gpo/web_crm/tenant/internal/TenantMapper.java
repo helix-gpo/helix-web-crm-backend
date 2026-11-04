@@ -53,19 +53,18 @@ final class TenantMapper {
         );
     }
 
-    static TenantDtos.PartnerResponse toPartnerResponse(Partner partner, String photoUrl) {
+    static TenantDtos.PartnerResponse toPartnerResponse(Partner partner) {
         return new TenantDtos.PartnerResponse(
                 partner.getId(),
                 partner.getFirstName(),
                 partner.getLastName(),
                 partner.getRole(),
                 partner.getEmail(),
-                partner.getPhone(),
-                photoUrl
+                partner.getPhone()
         );
     }
 
-    static PartnerSummary toPartnerSummary(Partner partner, String photoUrl) {
+    static PartnerSummary toPartnerSummary(Partner partner) {
         return new PartnerSummary(
                 partner.getId(),
                 partner.tenantId(),
@@ -73,8 +72,7 @@ final class TenantMapper {
                 partner.getFirstName(),
                 partner.getLastName(),
                 partner.getRole(),
-                partner.getEmail(),
-                photoUrl
+                partner.getEmail()
         );
     }
 

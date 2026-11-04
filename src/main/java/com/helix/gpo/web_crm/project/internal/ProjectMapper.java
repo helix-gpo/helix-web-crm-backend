@@ -14,7 +14,7 @@ final class ProjectMapper {
     private ProjectMapper() {
     }
 
-    static ProjectResponse toResponse(Project project, String imageUrl) {
+    static ProjectResponse toResponse(Project project) {
         return new ProjectResponse(
                 project.getId(),
                 project.getTenantId(),
@@ -29,7 +29,6 @@ final class ProjectMapper {
                 project.getStartDate(),
                 project.getEndDate(),
                 project.isVisibleOnWebsite(),
-                imageUrl,
                 project.getNotes(),
                 project.getMilestones().stream()
                         .map(ProjectMapper::toMilestoneResponse)

@@ -9,6 +9,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.stream.Collectors;
 
@@ -59,6 +60,17 @@ class GlobalExceptionHandler {
         log.warn("Zugriff verweigert: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
         problem.setTitle("Zugriff verweigert");
+        return problem;
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ProblemDetail handleMaxUploadSize(MaxUploadSizeExceededException ex) {
+        log.warn("Upload zu groß: {}", ex.getMessage());
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONTENT_TOO_LARGE,
+                "Die Datei ist zu groß - maximal 5 MB erlaubt."
+        );
+        problem.setTitle("Datei zu groß");
         return problem;
     }
 

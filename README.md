@@ -2,28 +2,8 @@
 
 ## Vor dem Go-Live
 
-### 1. Entscheidungen - DONE!
-- IaC: Terraform · Cognito Prod: eu-central-1 (Dev bleibt us-east-1)
-- Domains: www.helix-gpo.com, api.helix-gpo.com, crm.helix-gpo.com (Route 53 vorhanden)
-- Hosting: Backend + Website auf ECS Fargate hinter einem ALB, CRM-Frontend auf S3 + CloudFront
-- Mails: SES mit noreply@helix-gpo.com, Reply-To vorerst Gmail · kein Staging
-
 ### 2. Code fertigstellen
-- ⚠️ Flyway-Baseline, Credential-Kette, Test-Endpunkt entfernt, Cron-Zeitzone - DONE!
-- Fail-closed abschließen - DONE!
-- Altlasten: `created_by`, `console.log`, N+1 - DONE!
-- Testrunde: Partner beim Mandanten, Mandant → Projekt, Mail-Button, Mandanten-Filter - DONE!
-- Mail-Versand: Templates, typisierte Mails, Versand nach Commit mit Retry, Login-Link - DONE!
-- Validierungen: Backend-Längen, Frontend maxlength + Zähler, E-Mail-Prüfung, doppelte Toasts - DONE!
-- Health-Endpunkt (Backend /actuator/health/liveness, Website /healthz) - DONE!
-- Environments
-  - Backend: Prod-Profil, CORS aus Config, Fail-fast ohne Defaults - DONE!
-  - CRM-Frontend: environment.prod.ts, Prod-Cognito, Build-Konfiguration
-- Website an Backend anbinden (Projekte, Referenzen, Feedback-Submit inkl. Validierung, Env-URLs auf /api/public)
-  - öffentlicher Bild-Endpunkt (Projektbilder + Referenzfoto mit Einwilligung)
-  - /healthz testen
 - Prod-Start als Migration vorbereiten (Admin-Rolle, erste Admins, Rechnungsnummern-Startwert)
-- Bilder zurecht schneiden
 
 ### 3. Tests
 - Autorisierungs-Tests (Rollen, Aktionen, Scope) und Domain-Tests
@@ -35,7 +15,7 @@
 
 ### 5. AWS
 - Grundlagen: Account, Netzwerk, RDS, ECR
-- Secrets Manager, IAM-Rollen, S3 Prod-Bucket, SES (Domain verifizieren), Cognito Prod
+- Secrets Manager, IAM-Rollen, S3 Prod-Bucket, SES (Domain verifizieren), Cognito Prod (+ TODO-Werte in CRM environment.prod.ts eintragen)
 - ECS Fargate (Backend + Website), Load Balancer, Route 53, Zertifikate
 - CRM-Frontend auf S3 + CloudFront, WAF
 
@@ -60,6 +40,7 @@
 
 ## Future
 - Angebotserstellung für Mandanten (am Projekt oder direkt am Mandant) - erstes Feature, mit dem die Pipeline getestet wird
+- Rechnungen: Pauschal-Zahlungen monatlich (hängen an einem bestimmten Projekt)
 - E-Rechnung (XML)
 - Eingangsrechnungen
 - Account-Details für Consulting mit Timeline

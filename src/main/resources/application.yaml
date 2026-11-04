@@ -3,6 +3,11 @@ spring:
     name: helix-gpo-web-crm
   profiles:
     active: ${ACTIVE_SPRING_PROFILE:dev}
+  servlet:
+    multipart:
+      # matches ImageUploadValidator - the request limit leaves room for the multipart overhead
+      max-file-size: 5MB
+      max-request-size: 6MB
   security:
     oauth2:
       resourceserver:

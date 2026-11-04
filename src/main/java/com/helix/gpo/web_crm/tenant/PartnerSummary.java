@@ -9,6 +9,5 @@ public record PartnerSummary(
         String firstName,
         String lastName,
         String role,
-        String email,
-        String photoUrl) {
+        String email) {
 }

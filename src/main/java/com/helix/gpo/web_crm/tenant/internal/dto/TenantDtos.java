@@ -77,8 +77,7 @@ public final class TenantDtos {
             String lastName,
             String role,
             String email,
-            String phone,
-            String photoUrl
+            String phone
     ) {
     }
 

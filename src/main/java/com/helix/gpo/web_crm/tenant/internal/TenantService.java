@@ -192,45 +192,7 @@ class TenantService {
         accessApi.requireDelete(EntityType.PARTNER);
         Partner partner = getPartnerOrThrow(partnerId);
         requireTenantAccess(partner.getTenant());
-
-        if (partner.getPhotoKey() != null) {
-            storageApi.delete(partner.getPhotoKey());
-        }
         partnerRepository.deleteById(partnerId);
-    }
-
-    TenantDtos.PartnerResponse uploadPartnerPhoto(UUID partnerId, MultipartFile file) {
-        accessApi.requireWrite(EntityType.PARTNER);
-        Partner partner = getPartnerOrThrow(partnerId);
-        requireTenantAccess(partner.getTenant());
-
-        ImageUploadValidator.validate(file);
-
-        if (partner.getPhotoKey() != null) {
-            storageApi.delete(partner.getPhotoKey());
-        }
-
-        String key = ImageUploadValidator.generateKey("partner-photos", partnerId, file);
-        try {
-            storageApi.upload(key, file.getBytes(), file.getContentType());
-        } catch (IOException e) {
-            throw new IllegalStateException("Foto konnte nicht hochgeladen werden.", e);
-        }
-
-        partner.attachPhoto(key);
-        return toPartnerResponse(partner);
-    }
-
-    TenantDtos.PartnerResponse removePartnerPhoto(UUID partnerId) {
-        accessApi.requireWrite(EntityType.PARTNER);
-        Partner partner = getPartnerOrThrow(partnerId);
-        requireTenantAccess(partner.getTenant());
-
-        if (partner.getPhotoKey() != null) {
-            storageApi.delete(partner.getPhotoKey());
-            partner.removePhoto();
-        }
-        return toPartnerResponse(partner);
     }
 
     private Tenant getTenantOrThrow(UUID id) {
@@ -251,10 +213,7 @@ class TenantService {
     }
 
     private TenantDtos.PartnerResponse toPartnerResponse(Partner partner) {
-        String photoUrl = partner.getPhotoKey() != null
-                ? storageApi.presignedUrl(partner.getPhotoKey(), Duration.ofMinutes(30))
-                : null;
-        return TenantMapper.toPartnerResponse(partner, photoUrl);
+        return TenantMapper.toPartnerResponse(partner);
     }
 
     private List<Tenant> filterAccessible(List<Tenant> tenants) {

@@ -17,10 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -193,30 +190,17 @@ class TestimonialService {
         return toResponses(filterAccessible(testimonialRepository.findAllByTenantId(tenantId)));
     }
 
-    private List<TestimonialResponse> toResponses(List<Testimonial> testimonials) {
-        Map<UUID, PartnerSummary> partners = tenantApi.findPartnerSummariesByIds(
-                testimonials.stream()
-                        .map(Testimonial::getPartnerId)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toSet()));
-        return testimonials.stream()
-                .map(t -> {
-                    PartnerSummary partner = partners.get(t.getPartnerId());
-                    return TestimonialMapper.toResponse(t, partner != null ? partner.photoUrl() : null);
-                })
-                .toList();
-    }
-
     private Testimonial getOrThrow(UUID id) {
         return testimonialRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Diese Referenz wurde nicht gefunden."));
     }
 
+    private List<TestimonialResponse> toResponses(List<Testimonial> testimonials) {
+        return testimonials.stream().map(TestimonialMapper::toResponse).toList();
+    }
+
     private TestimonialResponse toResponse(Testimonial testimonial) {
-        String partnerPhotoUrl = tenantApi.findPartnerSummaryById(testimonial.getPartnerId())
-                .map(PartnerSummary::photoUrl)
-                .orElse(null);
-        return TestimonialMapper.toResponse(testimonial, partnerPhotoUrl);
+        return TestimonialMapper.toResponse(testimonial);
     }
 
     private void sendInvitationEmail(PartnerSummary partner, String toEmail, String rawToken) {
