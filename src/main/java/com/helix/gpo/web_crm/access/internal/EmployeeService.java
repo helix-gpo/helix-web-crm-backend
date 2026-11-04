@@ -32,29 +32,38 @@ class EmployeeService {
 
     EmployeeResponse create(CreateEmployeeRequest request) {
         accessApi.requireAdministration();
-
         if (employeeRepository.existsByEmailIgnoreCase(request.email())) {
             throw new IllegalStateException("Für diese E-Mail-Adresse existiert bereits ein Mitarbeiter.");
         }
 
         Role role = getRoleOrThrow(request.roleId());
+        Employee employee = createWithCognitoAccess(request.email(), request.firstName(), request.lastName(), role);
+        return AccessMapper.toResponse(employee, List.of());
+    }
 
-        CognitoAdminService.CreatedCognitoUser cognitoUser = cognitoAdminService.createUser(request.email());
-        cognitoAdminService.addToGroup(request.email(), groupFor(role));
+    // only for AdminBootstrap: on an empty database there is no admin yet who could invite anyone
+    void bootstrapAdmin(String email, String firstName, String lastName, Role adminRole) {
+        if (employeeRepository.existsByEmailIgnoreCase(email)) {
+            return;
+        }
+        createWithCognitoAccess(email, firstName, lastName, adminRole);
+    }
 
-        Employee employee = Employee.builder()
-                .email(request.email())
-                .firstName(request.firstName())
-                .lastName(request.lastName())
+    private Employee createWithCognitoAccess(String email, String firstName, String lastName, Role role) {
+        CognitoAdminService.CreatedCognitoUser cognitoUser = cognitoAdminService.createUser(email);
+        cognitoAdminService.addToGroup(email, groupFor(role));
+
+        Employee employee = employeeRepository.save(Employee.builder()
+                .email(email)
+                .firstName(firstName)
+                .lastName(lastName)
                 .role(role)
                 .cognitoSub(cognitoUser.sub())
                 .active(true)
-                .build();
-        employee = employeeRepository.save(employee);
+                .build());
 
         sendInvitationEmail(employee, cognitoUser.temporaryPassword());
-
-        return AccessMapper.toResponse(employee, List.of());
+        return employee;
     }
 
     EmployeeResponse update(UUID employeeId, UpdateEmployeeRequest request) {

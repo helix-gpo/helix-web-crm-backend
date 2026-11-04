@@ -26,6 +26,12 @@ class InvoiceSequence {
         this.lastValue = 0;
     }
 
+    // used once on go-live to continue an existing numbering
+    InvoiceSequence(int year, long lastValue) {
+        this.year = year;
+        this.lastValue = lastValue;
+    }
+
     long nextValue() {
         this.lastValue++;
         return this.lastValue;
