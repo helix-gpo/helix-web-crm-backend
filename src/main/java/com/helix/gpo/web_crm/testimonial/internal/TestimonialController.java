@@ -3,6 +3,7 @@ package com.helix.gpo.web_crm.testimonial.internal;
 import com.helix.gpo.web_crm.testimonial.internal.dto.TestimonialDtos.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -56,9 +57,16 @@ class TestimonialController {
     }
 
     // public api for website
+    @GetMapping("/api/public/testimonials/invitation")
+    PublicInvitationView invitation(@RequestParam String token) {
+        return testimonialService.findUsableInvitation(token);
+    }
+
+    // public api for website - answers without a body, the website needs no internal ids
     @PostMapping("/api/public/testimonials/submit")
-    TestimonialResponse submit(@Valid @RequestBody SubmitTestimonialRequest request) {
-        return testimonialService.submit(request);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void submit(@Valid @RequestBody SubmitTestimonialRequest request) {
+        testimonialService.submit(request);
     }
 
 }

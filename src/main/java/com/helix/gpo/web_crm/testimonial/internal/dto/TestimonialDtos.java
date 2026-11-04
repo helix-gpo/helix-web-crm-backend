@@ -67,4 +67,13 @@ public final class TestimonialDtos {
     ) {
     }
 
+    // what the public feedback page may know about an invitation - no ids, no internal state
+    public record PublicInvitationView(
+            String firstName,
+            String lastName,
+            String role,
+            String companyName
+    ) {
+    }
+
 }

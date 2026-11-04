@@ -44,4 +44,13 @@ class ProjectApiImpl implements ProjectApi {
                 .toList();
     }
 
+    // hidden projects behave like missing ones, the website must not learn they exist
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<PublicProjectSummary> findVisibleOnWebsiteById(UUID projectId) {
+        return projectRepository.findById(projectId)
+                .filter(Project::isVisibleOnWebsite)
+                .map(ProjectMapper::toPublicSummary);
+    }
+
 }

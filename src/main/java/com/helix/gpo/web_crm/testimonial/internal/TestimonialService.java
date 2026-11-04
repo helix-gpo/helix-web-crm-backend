@@ -90,19 +90,19 @@ class TestimonialService {
                 .toList();
     }
 
-    // public api for website - no access check, token-based instead
-    TestimonialResponse submit(SubmitTestimonialRequest request) {
-        String tokenHash = tokenGenerator.hash(request.token());
+    // public api for website - shows who was invited before the form is filled
+    @Transactional(readOnly = true)
+    PublicInvitationView findUsableInvitation(String rawToken) {
+        TestimonialInvitation invitation = getUsableInvitationOrThrow(rawToken);
+        PartnerSummary partner = getPartnerOrThrow(invitation.getPartnerId());
+        return new PublicInvitationView(
+                partner.firstName(), partner.lastName(), partner.role(), partner.companyName());
+    }
 
-        TestimonialInvitation invitation = invitationRepository.findByTokenHash(tokenHash)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid or unknown token"));
-
-        if (!invitation.isUsable()) {
-            throw new IllegalStateException("Dieser Einladungslink ist abgelaufen, bereits verwendet oder wurde widerrufen.");
-        }
-
-        PartnerSummary partner = tenantApi.findPartnerSummaryById(invitation.getPartnerId())
-                .orElseThrow(() -> new EntityNotFoundException("Dieser Ansprechpartner wurde nicht gefunden."));
+    // public api for website
+    void submit(SubmitTestimonialRequest request) {
+        TestimonialInvitation invitation = getUsableInvitationOrThrow(request.token());
+        PartnerSummary partner = getPartnerOrThrow(invitation.getPartnerId());
 
         Testimonial testimonial = Testimonial.builder()
                 .invitationId(invitation.getId())
@@ -117,8 +117,22 @@ class TestimonialService {
                 .build();
 
         invitation.markUsed();
+        testimonialRepository.save(testimonial);
+    }
 
-        return toResponse(testimonialRepository.save(testimonial));
+    private TestimonialInvitation getUsableInvitationOrThrow(String rawToken) {
+        TestimonialInvitation invitation = invitationRepository.findByTokenHash(tokenGenerator.hash(rawToken))
+                .orElseThrow(() -> new EntityNotFoundException("Dieser Einladungslink ist ungültig."));
+        if (!invitation.isUsable()) {
+            throw new IllegalStateException(
+                    "Dieser Einladungslink ist abgelaufen, bereits verwendet oder wurde widerrufen.");
+        }
+        return invitation;
+    }
+
+    private PartnerSummary getPartnerOrThrow(UUID partnerId) {
+        return tenantApi.findPartnerSummaryById(partnerId)
+                .orElseThrow(() -> new EntityNotFoundException("Dieser Ansprechpartner wurde nicht gefunden."));
     }
 
     TestimonialResponse approve(UUID id) {

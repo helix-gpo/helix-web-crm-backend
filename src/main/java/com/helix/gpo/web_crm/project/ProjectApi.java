@@ -14,4 +14,6 @@ public interface ProjectApi {
 
     List<PublicProjectSummary> findAllVisibleOnWebsite();
 
+    Optional<PublicProjectSummary> findVisibleOnWebsiteById(UUID projectId);
+
 }
