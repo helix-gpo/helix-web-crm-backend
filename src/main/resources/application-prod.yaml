@@ -1,8 +1,14 @@
 spring:
+  datasource:
+    # RDS: enforce TLS, port defaults to mysql standard
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}?sslMode=REQUIRED&serverTimezone=UTC
   jpa:
     hibernate:
       ddl-auto: validate
     show-sql: false
+  flyway:
+    # prod starts with an empty database - no baselining of existing schemas
+    baseline-on-migrate: false
 
 logging:
   level:

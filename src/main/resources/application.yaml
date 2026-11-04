@@ -32,6 +32,17 @@ spring:
 server:
   port: ${SERVER_PORT:8081}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+
 logging:
   level:
     org.springframework.modulith: DEBUG
@@ -54,7 +65,7 @@ helix:
     cognito:
       client-id: ${COGNITO_CLIENT_ID}
       user-pool-id: ${COGNITO_USER_POOL_ID}
-      region: ${COGNITO_REGION:us-east-1}
+      region: ${COGNITO_REGION}
   s3:
     bucket: ${S3_BUCKET_NAME}
     region: eu-central-1
@@ -63,6 +74,9 @@ helix:
     sender-name: ${NOTIFICATION_SENDER_NAME:Helix GPO}
     reply-to-email: ${NOTIFICATION_REPLY_TO_EMAIL:helix.gpo@gmail.com}
     region: eu-central-1
-    crm-url: ${CRM_BASE_URL:http://localhost:4200}
+    crm-url: ${CRM_BASE_URL}
   website:
-    base-url: ${WEBSITE_BASE_URL:http://localhost:4201}
+    base-url: ${WEBSITE_BASE_URL}
+    cors:
+      crm-origins: ${CRM_ALLOWED_ORIGINS}
+      public-origins: ${PUBLIC_ALLOWED_ORIGINS}

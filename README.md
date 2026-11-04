@@ -11,15 +11,17 @@
 ### 2. Code fertigstellen
 - ⚠️ Flyway-Baseline, Credential-Kette, Test-Endpunkt entfernt, Cron-Zeitzone - DONE!
 - Fail-closed abschließen - DONE!
-- Altlasten: `created_by`, `console.log`, N+1 - DONE! · offen: altes Passwort rotieren (welches?)
+- Altlasten: `created_by`, `console.log`, N+1 - DONE!
 - Testrunde: Partner beim Mandanten, Mandant → Projekt, Mail-Button, Mandanten-Filter - DONE!
-- Mail-Versand: Templates + typisierte Mails - DONE! · offen: Versand nach Commit, asynchron mit Retry
-- Einladungsmail für Mitarbeiter mit Login-Link
-- Frontend Validierungen (Zeichenlänge etc.)
-- Health-Endpunkt für den Load Balancer
-- Environments Frontend und Backend (Prod-Profil, Prod-Cognito-Client, Cognito-Region), CORS aus Config
-- Website an Backend anbinden (Projekte, Referenzen, Feedback-Submit, Env-URLs auf /api/public)
-    - öffentlicher Bild-Endpunkt (Projektbilder + Referenzfoto mit Einwilligung)
+- Mail-Versand: Templates, typisierte Mails, Versand nach Commit mit Retry, Login-Link - DONE!
+- Validierungen: Backend-Längen, Frontend maxlength + Zähler, E-Mail-Prüfung, doppelte Toasts - DONE!
+- Health-Endpunkt (Backend /actuator/health/liveness, Website /healthz) - DONE!
+- Environments
+  - Backend: Prod-Profil, CORS aus Config, Fail-fast ohne Defaults - DONE!
+  - CRM-Frontend: environment.prod.ts, Prod-Cognito, Build-Konfiguration
+- Website an Backend anbinden (Projekte, Referenzen, Feedback-Submit inkl. Validierung, Env-URLs auf /api/public)
+  - öffentlicher Bild-Endpunkt (Projektbilder + Referenzfoto mit Einwilligung)
+  - /healthz testen
 - Prod-Start als Migration vorbereiten (Admin-Rolle, erste Admins, Rechnungsnummern-Startwert)
 - Bilder zurecht schneiden
 
@@ -39,7 +41,7 @@
 
 ### 6. Pipeline und Betrieb
 - Pipeline für Backend, CRM-Frontend und Website
-- Logging, Monitoring, Alarme
+- Logging, Monitoring, Alarme (inkl. fehlgeschlagener Mail-Events)
 - Backups mit Restore-Test, Runbooks, Datenschutz
 
 ### 7. Doku
@@ -57,9 +59,10 @@
 - Mitarbeiter-Seite mit Suche und Filter
 
 ## Future
+- Angebotserstellung für Mandanten (am Projekt oder direkt am Mandant) - erstes Feature, mit dem die Pipeline getestet wird
 - E-Rechnung (XML)
 - Eingangsrechnungen
 - Account-Details für Consulting mit Timeline
 - Teams für Rollen, Projekte und Mandanten
 - Team auf der Website
-- VPN (Netzwerk und Firewall)
+- VPN (Netzwerk und Firewall) + Verstecken vor der Öffentlichkeit

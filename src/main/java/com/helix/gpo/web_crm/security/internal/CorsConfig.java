@@ -1,5 +1,6 @@
 package com.helix.gpo.web_crm.security.internal;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -9,22 +10,19 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
+@EnableConfigurationProperties(CorsProperties.class)
 class CorsConfig {
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
+    CorsConfigurationSource corsConfigurationSource(CorsProperties properties) {
         CorsConfiguration crmConfiguration = new CorsConfiguration();
-        crmConfiguration.setAllowedOrigins(List.of("http://localhost:4200"));
+        crmConfiguration.setAllowedOrigins(properties.crmOrigins());
         crmConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         crmConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         crmConfiguration.setAllowCredentials(true);
 
         CorsConfiguration publicConfiguration = new CorsConfiguration();
-        publicConfiguration.setAllowedOrigins(List.of(
-                "http://localhost:4201",
-                "https://helix-gpo.com",
-                "https://www.helix-gpo.com"
-        ));
+        publicConfiguration.setAllowedOrigins(properties.publicOrigins());
         publicConfiguration.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
         publicConfiguration.setAllowedHeaders(List.of("Content-Type"));
         publicConfiguration.setAllowCredentials(false);
