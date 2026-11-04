@@ -206,6 +206,10 @@ class Invoice extends BaseEntity {
     }
 
     public void issue(String invoiceNumber, LocalDate issueDate) {
+        // a second issue would burn a number and overwrite the first one
+        if (this.status != InvoiceStatus.DRAFT) {
+            throw new IllegalStateException("Nur Entwürfe können ausgestellt werden.");
+        }
         if (this.lineItems.isEmpty()) {
             throw new IllegalStateException("Eine Rechnung ohne Positionen kann nicht ausgestellt werden.");
         }

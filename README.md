@@ -2,35 +2,32 @@
 
 ## Vor dem Go-Live
 
-### 2. Code fertigstellen
-- Prod-Start als Migration vorbereiten (Admin-Rolle, erste Admins, Rechnungsnummern-Startwert)
-
-### 3. Tests
+### 1. Tests
 - Autorisierungs-Tests (Rollen, Aktionen, Scope) und Domain-Tests
 - Frontend-Tests und ein E2E-Smoke
 
-### 4. Docker
+### 2. Docker
 - Dockerfile Backend + Website (SSR), docker-compose lokal
-- Prod-Simulation lokal gegen frische Datenbank
+- Prod-Simulation lokal gegen frische Datenbank (inkl. Admin-Bootstrap)
 
-### 5. AWS
+### 3. AWS
 - Grundlagen: Account, Netzwerk, RDS, ECR
 - Secrets Manager, IAM-Rollen, S3 Prod-Bucket, SES (Domain verifizieren), Cognito Prod (+ TODO-Werte in CRM environment.prod.ts eintragen)
 - ECS Fargate (Backend + Website), Load Balancer, Route 53, Zertifikate
 - CRM-Frontend auf S3 + CloudFront, WAF
 
-### 6. Pipeline und Betrieb
+### 4. Pipeline und Betrieb
 - Pipeline für Backend, CRM-Frontend und Website
 - Logging, Monitoring, Alarme (inkl. fehlgeschlagener Mail-Events)
 - Backups mit Restore-Test, Runbooks, Datenschutz
 
-### 7. Doku
+### 5. Doku
 - README mit Setup und Env-Tabelle
 - JavaDoc und Confluence-Seite
 
-### 8. Go-Live
+### 6. Go-Live
 - Mail-Texte final mit dem Geschäftspartner
-- Prod-Start ausführen
+- Prod-Start ausführen (Bootstrap-Admins Felix + Henry)
 - Abnahme-Durchlauf (Login bis Rechnung, Mail, PDF, Referenz-Link)
 - Alte Website ersetzen
 
@@ -40,6 +37,7 @@
 
 ## Future
 - Angebotserstellung für Mandanten (am Projekt oder direkt am Mandant) - erstes Feature, mit dem die Pipeline getestet wird
+- Dokumentenspeicherung von Mandanten
 - Rechnungen: Pauschal-Zahlungen monatlich (hängen an einem bestimmten Projekt)
 - E-Rechnung (XML)
 - Eingangsrechnungen

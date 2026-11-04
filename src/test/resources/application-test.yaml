@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    # replaced by the testcontainers service connection - only here so the base placeholders never resolve
+    url: jdbc:mysql://localhost/placeholder
+    username: test
+    password: test
+  jpa:
+    hibernate:
+      # same as prod: the schema built by flyway must match the entities
+      ddl-auto: validate
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_test
+
+helix:
+  company:
+    vat-id: DE000000000
+    iban: DE00000000000000000000
+    bic: TESTDEFFXXX
+  security:
+    cognito:
+      client-id: test-client
+      user-pool-id: eu-central-1_test
+      region: eu-central-1
+  s3:
+    bucket: test-bucket
+  notification:
+    crm-url: http://localhost:4200
+  website:
+    base-url: http://localhost:4201
+  cors:
+    crm-origins: http://localhost:4200
+    public-origins: http://localhost:4201
