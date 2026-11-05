@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // every test runs in a transaction that is rolled back - fixtures and created data disappear afterwards
@@ -42,8 +43,10 @@ class SecurityIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    void deactivatedEmployeeIsForbidden() throws Exception {
-        mockMvc.perform(get("/api/crm/tenants").with(user("inactive-sub"))).andExpect(status().isForbidden());
+    void deactivatedEmployeeIsLoggedOut() throws Exception {
+        mockMvc.perform(get("/api/crm/tenants").with(jwt().jwt(j -> j.subject("inactive-sub"))))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("ACCOUNT_DEACTIVATED"));
     }
 
     // ---- permissions ----

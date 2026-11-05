@@ -9,7 +9,7 @@ import java.util.UUID;
 
 interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
-    Optional<Employee> findByEmailIgnoreCase(String email);
+    boolean existsByCognitoSubAndActiveFalse(String cognitoSub);
 
     Optional<Employee> findByCognitoSub(String cognitoSub);
 

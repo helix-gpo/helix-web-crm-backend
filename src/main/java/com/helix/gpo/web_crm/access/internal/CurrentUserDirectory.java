@@ -28,7 +28,7 @@ class CurrentUserDirectory {
                 employee -> emailBySub.put(sub, employee.getEmail()),
                 () -> {
                     if (alreadyWarned.add(sub)) {
-                        log.warn("Kein Mitarbeiter mit cognito_sub={} gefunden - Zugriff läuft über die Übergangs-Ausnahme", sub);
+                        log.warn("Kein aktiver Mitarbeiter mit cognito_sub={} gefunden - Anfragen werden ohne Berechtigungen abgelehnt", sub);
                     }
                 });
     }
@@ -43,6 +43,10 @@ class CurrentUserDirectory {
             emailBySub.remove(sub);
             alreadyWarned.remove(sub);
         }
+    }
+
+    boolean isDeactivated(String sub) {
+        return sub != null && employeeRepository.existsByCognitoSubAndActiveFalse(sub);
     }
 
 }

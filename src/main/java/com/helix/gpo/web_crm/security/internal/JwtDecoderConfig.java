@@ -2,14 +2,16 @@ package com.helix.gpo.web_crm.security.internal;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtDecoders;
-import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
-import org.springframework.security.oauth2.jwt.JwtValidators;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.*;
+import org.springframework.web.client.RestTemplate;
+
+import java.time.Duration;
 
 @Configuration
 @RequiredArgsConstructor
@@ -22,17 +24,21 @@ class JwtDecoderConfig {
 
     @Bean
     JwtDecoder jwtDecoder() {
-        NimbusJwtDecoder decoder = JwtDecoders.fromIssuerLocation(issuerUri);
+        var requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(Duration.ofSeconds(3));
+        requestFactory.setReadTimeout(Duration.ofSeconds(5));
 
-        OAuth2TokenValidator<org.springframework.security.oauth2.jwt.Jwt> defaultValidator =
-                JwtValidators.createDefaultWithIssuer(issuerUri);
+        // keys stay cached until cognito rotates them (unknown kid triggers a refetch)
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withIssuerLocation(issuerUri)
+                .restOperations(new RestTemplate(requestFactory))
+                .cache(new ConcurrentMapCache("cognito-jwks"))
+                .build();
 
-        OAuth2TokenValidator<org.springframework.security.oauth2.jwt.Jwt> combinedValidator =
-                new org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator<>(
-                        defaultValidator,
-                        new JwtTimestampValidator(),
-                        cognitoTokenValidator
-                );
+        OAuth2TokenValidator<Jwt> combinedValidator = new DelegatingOAuth2TokenValidator<>(
+                JwtValidators.createDefaultWithIssuer(issuerUri),
+                new JwtTimestampValidator(),
+                cognitoTokenValidator
+        );
 
         decoder.setJwtValidator(combinedValidator);
         return decoder;

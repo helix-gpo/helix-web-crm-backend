@@ -82,6 +82,6 @@ helix:
     crm-url: ${CRM_BASE_URL}
   website:
     base-url: ${WEBSITE_BASE_URL}
-    cors:
-      crm-origins: ${CRM_ALLOWED_ORIGINS}
-      public-origins: ${PUBLIC_ALLOWED_ORIGINS}
+  cors:
+    crm-origins: ${CRM_ALLOWED_ORIGINS}
+    public-origins: ${PUBLIC_ALLOWED_ORIGINS}

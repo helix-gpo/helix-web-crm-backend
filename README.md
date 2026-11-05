@@ -2,6 +2,11 @@
 
 ## Vor dem Go-Live
 
+### 0. Offene (neue) Punkte:
+- Validierung von Daten
+- Abschluss von Projekten --> Status Updates
+- Kein Dashboard Zugriff für nicht Admins
+
 ### 1. Tests
 - Autorisierungs-Tests (Rollen, Aktionen, Scope) und Domain-Tests
 - Frontend-Tests und ein E2E-Smoke

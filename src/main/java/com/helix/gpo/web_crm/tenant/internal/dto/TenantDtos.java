@@ -25,7 +25,7 @@ public final class TenantDtos {
             @Email @Size(max = 254) String contactEmail,
             @Size(max = 30) String contactPhone,
             @Size(max = 500) String websiteUrl,
-            @Valid List<CreatePartnerRequest> partners
+            List<@Valid CreatePartnerRequest> partners
     ) {
     }
 

@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,14 @@ class CurrentUserFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            if (currentUserDirectory.isDeactivated(jwt.getSubject())) {
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("""
+                {"status":401,"code":"ACCOUNT_DEACTIVATED","detail":"Dein Zugang wurde deaktiviert."}""");
+                return;
+            }
             currentUserDirectory.resolve(jwt.getSubject());
         }
         filterChain.doFilter(request, response);

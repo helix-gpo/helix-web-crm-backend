@@ -35,7 +35,7 @@ public final class InvoiceDtos {
             UUID projectId,
             @Size(max = 60) String buyerReference,
             Integer paymentTermsDays,
-            @NotEmpty @Valid List<LineItemRequest> lineItems
+            @NotEmpty List<@Valid LineItemRequest> lineItems
     ) {
     }
 
