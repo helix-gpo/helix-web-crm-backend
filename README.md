@@ -2,35 +2,22 @@
 
 ## Vor dem Go-Live
 
-### 0. Offene (neue) Punkte:
-- Validierung von Daten
-- Abschluss von Projekten --> Status Updates
-- Kein Dashboard Zugriff für nicht Admins
-
-### 1. Tests
-- Autorisierungs-Tests (Rollen, Aktionen, Scope) und Domain-Tests
-- Frontend-Tests und ein E2E-Smoke
-
-### 2. Docker
-- Dockerfile Backend + Website (SSR), docker-compose lokal
-- Prod-Simulation lokal gegen frische Datenbank (inkl. Admin-Bootstrap)
-
-### 3. AWS
+### 2. AWS
 - Grundlagen: Account, Netzwerk, RDS, ECR
 - Secrets Manager, IAM-Rollen, S3 Prod-Bucket, SES (Domain verifizieren), Cognito Prod (+ TODO-Werte in CRM environment.prod.ts eintragen)
 - ECS Fargate (Backend + Website), Load Balancer, Route 53, Zertifikate
 - CRM-Frontend auf S3 + CloudFront, WAF
 
-### 4. Pipeline und Betrieb
+### 3. Pipeline und Betrieb
 - Pipeline für Backend, CRM-Frontend und Website
 - Logging, Monitoring, Alarme (inkl. fehlgeschlagener Mail-Events)
 - Backups mit Restore-Test, Runbooks, Datenschutz
 
-### 5. Doku
+### 4. Doku
 - README mit Setup und Env-Tabelle
 - JavaDoc und Confluence-Seite
 
-### 6. Go-Live
+### 5. Go-Live
 - Mail-Texte final mit dem Geschäftspartner
 - Prod-Start ausführen (Bootstrap-Admins Felix + Henry)
 - Abnahme-Durchlauf (Login bis Rechnung, Mail, PDF, Referenz-Link)
@@ -38,9 +25,9 @@
 
 ## Danach
 - Website-Chatbot: n8n-AI durch Google-MCP ersetzen
-- Mitarbeiter-Seite mit Suche und Filter
 
 ## Future
+- Mitarbeiter-Seite mit Suche und Filter
 - Angebotserstellung für Mandanten (am Projekt oder direkt am Mandant) - erstes Feature, mit dem die Pipeline getestet wird
 - Dokumentenspeicherung von Mandanten
 - Rechnungen: Pauschal-Zahlungen monatlich (hängen an einem bestimmten Projekt)

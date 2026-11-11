@@ -27,6 +27,7 @@ class ProjectService {
 
     ProjectDtos.ProjectResponse create(ProjectDtos.CreateProjectRequest request) {
         accessApi.requireWrite(EntityType.PROJECT);
+        Project.assertValidPeriod(request.startDate(), request.endDate());
 
         if (!tenantApi.existsAndIsActive(request.tenantId())) {
             throw new IllegalStateException("Tenant is not active or does not exist: " + request.tenantId());
@@ -152,27 +153,32 @@ class ProjectService {
     ProjectDtos.MilestoneResponse updateMilestone(UUID milestoneId, ProjectDtos.UpdateMilestoneRequest request) {
         accessApi.requireWrite(EntityType.MILESTONE);
         Milestone milestone = getMilestoneOrThrow(milestoneId);
-        requireProjectAccess(milestone.getProject());
+        Project project = milestone.getProject();
+        requireProjectAccess(project);
 
-        milestone.updateDetails(request.title(), request.description(), request.dueDate(), request.price(), request.status());
+        project.updateMilestone(milestone, request.title(), request.description(),
+                request.dueDate(), request.price(), request.status());
         return ProjectMapper.toMilestoneResponse(milestone);
     }
 
     ProjectDtos.MilestoneResponse changeMilestoneStatus(UUID milestoneId, ProjectDtos.ChangeMilestoneStatusRequest request) {
         accessApi.requireWrite(EntityType.MILESTONE);
         Milestone milestone = getMilestoneOrThrow(milestoneId);
-        requireProjectAccess(milestone.getProject());
+        Project project = milestone.getProject();
+        requireProjectAccess(project);
 
-        milestone.changeStatus(request.status());
+        project.changeMilestoneStatus(milestone, request.status());
         return ProjectMapper.toMilestoneResponse(milestone);
     }
 
     void removeMilestone(UUID milestoneId) {
         accessApi.requireDelete(EntityType.MILESTONE);
         Milestone milestone = getMilestoneOrThrow(milestoneId);
-        requireProjectAccess(milestone.getProject());
+        Project project = milestone.getProject();
+        requireProjectAccess(project);
 
-        milestoneRepository.delete(milestone);
+        // orphanRemoval deletes the row
+        project.removeMilestone(milestone);
     }
 
     private void requireProjectAccess(Project project) {
