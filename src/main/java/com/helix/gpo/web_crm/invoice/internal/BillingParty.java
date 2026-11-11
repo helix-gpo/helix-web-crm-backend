@@ -13,6 +13,9 @@ public record BillingParty(
         @Column(length = 20)
         String vatId,
 
+        @Column(length = 20)
+        String taxNumber,
+
         @Embedded
         Address address,
 

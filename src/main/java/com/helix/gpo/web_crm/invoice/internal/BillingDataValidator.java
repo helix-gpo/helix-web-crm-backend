@@ -10,14 +10,17 @@ final class BillingDataValidator {
     private BillingDataValidator() {
     }
 
-    static List<String> missingFields(InvoiceDtos.BillingPartyDto party, String label, boolean requireBankDetails) {
+    static List<String> missingFields(InvoiceDtos.BillingPartyDto party, String label, boolean isSeller) {
         List<String> missing = new ArrayList<>();
 
         if (isBlank(party.name())) {
             missing.add(label + ": Name");
         }
-        if (isBlank(party.vatId())) {
-            missing.add(label + ": USt-ID");
+
+        // § 14 UStG: the seller states tax number OR VAT id. The buyer's VAT id
+        // is only needed for EU reverse charge, so it stays optional here.
+        if (isSeller && isBlank(party.vatId()) && isBlank(party.taxNumber())) {
+            missing.add(label + ": Steuernummer oder USt-IdNr.");
         }
 
         var address = party.address();
@@ -30,7 +33,7 @@ final class BillingDataValidator {
             missing.add(label + ": vollständige Anschrift");
         }
 
-        if (requireBankDetails && (isBlank(party.iban()) || isBlank(party.bic()))) {
+        if (isSeller && (isBlank(party.iban()) || isBlank(party.bic()))) {
             missing.add(label + ": Bankverbindung (IBAN/BIC)");
         }
 

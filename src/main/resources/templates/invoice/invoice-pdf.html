@@ -192,7 +192,9 @@
         <td class="seller-block">
             <strong th:text="${seller.name}">Helix GPO UG</strong><br/>
             <span th:text="${sellerAddressLine}">Erftstraße 50, 41460 Neuss</span><br/>
-            <span th:text="${seller.email} + ' · USt-IdNr. ' + ${seller.vatId}"></span>
+            <span th:text="${seller.email}"></span>
+            <span th:if="${!#strings.isEmpty(seller.vatId)}" th:text="' · USt-IdNr. ' + ${seller.vatId}"></span>
+            <span th:if="${#strings.isEmpty(seller.vatId)}" th:text="' · Steuernr. ' + ${seller.taxNumber}"></span>
         </td>
     </tr>
 </table>
@@ -216,7 +218,8 @@
         <td class="align-right meta-grey" th:text="'Datum: ' + ${issueDate}"></td>
     </tr>
     <tr>
-        <td class="meta-grey" th:text="'USt-IdNr.: ' + ${buyer.vatId}"></td>
+        <td class="meta-grey"
+            th:text="${#strings.isEmpty(buyer.vatId)} ? '' : 'USt-IdNr.: ' + ${buyer.vatId}"></td>
         <td></td>
         <td class="align-right meta-grey" th:text="'Fällig: ' + ${dueDate}"></td>
     </tr>
@@ -270,7 +273,7 @@
 
 <div class="footer">
     <p th:text="'Zahlbar innerhalb von ' + ${paymentTermsDays} + ' Tagen ohne Abzüge.'"></p>
-    <p th:if="${buyerReference}" th:text="'Verwendungszweck: ' + ${invoiceNumber}"></p>
+    <p th:text="'Verwendungszweck: ' + ${invoiceNumber}"></p>
     <p th:text="${sellerName} + ' · IBAN ' + ${seller.iban} + ' · BIC ' + ${seller.bic}"></p>
 </div>
 

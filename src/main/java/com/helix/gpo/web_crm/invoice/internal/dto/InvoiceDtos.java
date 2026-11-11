@@ -94,6 +94,7 @@ public final class InvoiceDtos {
     public record BillingPartyDto(
             String name,
             String vatId,
+            String taxNumber,
             Address address,
             String email,
             String iban,

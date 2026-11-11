@@ -10,9 +10,12 @@ final class InvoiceMapper {
     }
 
     static BillingParty toSellerSnapshot(CompanyBillingProperties company) {
+        // the invoice must state the full legal company name
+        String name = blankToNull(company.legalName()) != null ? company.legalName() : company.name();
         return new BillingParty(
-                company.name(),
-                company.vatId(),
+                name,
+                blankToNull(company.vatId()),
+                blankToNull(company.taxNumber()),
                 company.address(),
                 company.email(),
                 company.iban(),
@@ -22,14 +25,19 @@ final class InvoiceMapper {
 
     static BillingParty toBuyerSnapshot(TenantBillingDetails tenant) {
         String name = tenant.legalName() != null ? tenant.legalName() : tenant.companyName();
-        return new BillingParty(name, tenant.vatId(), tenant.address(), tenant.contactEmail(), null, null);
+        return new BillingParty(name, blankToNull(tenant.vatId()), null, tenant.address(), tenant.contactEmail(), null, null);
     }
 
     static BillingPartyDto toDto(BillingParty party) {
         if (party == null) return null;
         return new BillingPartyDto(
-                party.name(), party.vatId(), party.address(), party.email(), party.iban(), party.bic()
+                party.name(), party.vatId(), party.taxNumber(), party.address(), party.email(), party.iban(), party.bic()
         );
+    }
+
+    // an unset optional env var arrives as "" - store null instead
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value;
     }
 
     static InvoiceLineItemResponse toLineItemResponse(InvoiceLineItem item) {

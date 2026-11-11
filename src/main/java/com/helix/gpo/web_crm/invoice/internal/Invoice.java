@@ -111,6 +111,7 @@ class Invoice extends BaseEntity {
     @Embedded
     @AttributeOverride(name = "name", column = @Column(name = "seller_name"))
     @AttributeOverride(name = "vatId", column = @Column(name = "seller_vat_id"))
+    @AttributeOverride(name = "taxNumber", column = @Column(name = "seller_tax_number"))
     @AttributeOverride(name = "email", column = @Column(name = "seller_email"))
     @AttributeOverride(name = "iban", column = @Column(name = "seller_iban"))
     @AttributeOverride(name = "bic", column = @Column(name = "seller_bic"))
@@ -124,6 +125,7 @@ class Invoice extends BaseEntity {
     @Embedded
     @AttributeOverride(name = "name", column = @Column(name = "buyer_name"))
     @AttributeOverride(name = "vatId", column = @Column(name = "buyer_vat_id"))
+    @AttributeOverride(name = "taxNumber", column = @Column(name = "buyer_tax_number"))
     @AttributeOverride(name = "email", column = @Column(name = "buyer_email"))
     @AttributeOverride(name = "iban", column = @Column(name = "buyer_iban"))
     @AttributeOverride(name = "bic", column = @Column(name = "buyer_bic"))

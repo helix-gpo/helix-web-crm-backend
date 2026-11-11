@@ -56,7 +56,9 @@ helix:
   company:
     name: Helix GPO
     legal-name: Helix GPO UG (haftungsbeschränkt) & Co. KG
-    vat-id: ${HELIX_VAT_ID}
+    tax-number: ${HELIX_TAX_NUMBER}
+    # optional until the VAT id is assigned - the only intended default here
+    vat-id: ${HELIX_VAT_ID:}
     address:
       street: Erftstraße
       house-number: "50"

@@ -8,6 +8,7 @@ public record CompanyBillingProperties(
         String name,
         String legalName,
         String vatId,
+        String taxNumber,
         Address address,
         String email,
         String iban,
