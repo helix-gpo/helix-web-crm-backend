@@ -16,6 +16,7 @@
 ### 4. Doku
 - README mit Setup und Env-Tabelle
 - JavaDoc und Confluence-Seite
+- PDF mit Infra Übersicht
 
 ### 5. Go-Live
 - Mail-Texte final mit dem Geschäftspartner
